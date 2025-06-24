@@ -3,9 +3,9 @@
 ### Generate professional-grade 48kHz stereo audio with Auto Flow
 
 ## Features
-- 🎛️ 32 prompt knobs (reassignable realtime with mouse / touch or hardware MIDI control)
-- ✨ Auto (toggleable realtime weights fluctualtion on every knob)
-- 🪩 Flow (toggleable realtime seed flowing (`fluctuation (both on)` / `🆙` / `down`)
+- 🎛️ 32 reassignable prompt knobs (🖱️mouse / 🫵🏻touch or 🎛️hardware MIDI control)
+- ✨ Auto (weights fluctualtion on every knob)
+- 🪩 Flow (seed fluctuation (both on)/ `🆙` / `down`)
 - 💾 Save / Load Presets
 - ⚙️ Advanced settings knobs and buttons for granular synthesis control:
   - `BPM`
