@@ -4,8 +4,8 @@
 
 ## Features
 - 🎛️ 32 reassignable prompt knobs (🖱️mouse / 🫵🏻touch or 🎛️hardware MIDI control)
-- ✨ Auto (prompt weights fluctualtion on every knob)
-- 🪩 Flow (generator seed `fluctuation` / `🆙` / `down`)
+- ✨ Auto (prompt weights randomizer on every knob)
+- 🪩 Flow (generator seed `randomizer` / `🆙` / `down`)
 - 💾 Save / Load Presets
 - ⚙️ Advanced settings knobs and buttons for granular synthesizer control:
   - `BPM`
