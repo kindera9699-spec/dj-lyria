@@ -2984,10 +2984,6 @@ export class PromptDjMidi extends LitElement {
                 }
               </span>
             `
-                  : this.geminiApiKey && this.apiKeySavedSuccessfully
-                    ? html`
-              <span style="color: green; margin-left: 10px;">API Key saved.</span>
-            `
                     : !this.geminiApiKey && !this.apiKeySavedSuccessfully
                       ? html`
               <span style="color: yellow; margin-left: 10px;">No API Key provided.</span>
