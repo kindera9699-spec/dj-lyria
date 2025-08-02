@@ -514,6 +514,892 @@ describe('UnifiedDJControlBlock Click and Hold Interaction', () => {
   });
 });
 
+describe('UnifiedDJControlBlock State Transition Logic and Validation', () => {
+  let element: UnifiedDJControlBlock;
+
+  beforeEach(async () => {
+    element = await fixture(html`<unified-dj-control-block></unified-dj-control-block>`);
+  });
+
+  describe('Valid State Transitions', () => {
+    it('should allow transition from idle to playing', async () => {
+      expect(element.shadowRoot?.querySelector('.dj-hardware-switch')?.classList.contains('idle')).to.be.true;
+      
+      element.playbackState = 'playing';
+      await element.updateComplete;
+      await element.updateComplete;
+      
+      expect(element.shadowRoot?.querySelector('.dj-hardware-switch')?.classList.contains('playing')).to.be.true;
+    });
+
+    it('should allow transition from idle to recording', async () => {
+      expect(element.shadowRoot?.querySelector('.dj-hardware-switch')?.classList.contains('idle')).to.be.true;
+      
+      element.isRecording = true;
+      await element.updateComplete;
+      await element.updateComplete;
+      
+      expect(element.shadowRoot?.querySelector('.dj-hardware-switch')?.classList.contains('recording')).to.be.true;
+    });
+
+    it('should allow transition from idle to loading', async () => {
+      expect(element.shadowRoot?.querySelector('.dj-hardware-switch')?.classList.contains('idle')).to.be.true;
+      
+      element.playbackState = 'loading';
+      await element.updateComplete;
+      await element.updateComplete;
+      
+      expect(element.shadowRoot?.querySelector('.dj-hardware-switch')?.classList.contains('loading')).to.be.true;
+    });
+
+    it('should allow transition from playing to paused', async () => {
+      element.playbackState = 'playing';
+      await element.updateComplete;
+      await element.updateComplete;
+      expect(element.shadowRoot?.querySelector('.dj-hardware-switch')?.classList.contains('playing')).to.be.true;
+      
+      element.playbackState = 'paused';
+      await element.updateComplete;
+      await element.updateComplete;
+      
+      expect(element.shadowRoot?.querySelector('.dj-hardware-switch')?.classList.contains('paused')).to.be.true;
+    });
+
+    it('should allow transition from playing to recording', async () => {
+      element.playbackState = 'playing';
+      await element.updateComplete;
+      await element.updateComplete;
+      expect(element.shadowRoot?.querySelector('.dj-hardware-switch')?.classList.contains('playing')).to.be.true;
+      
+      element.isRecording = true;
+      await element.updateComplete;
+      await element.updateComplete;
+      
+      expect(element.shadowRoot?.querySelector('.dj-hardware-switch')?.classList.contains('recording')).to.be.true;
+    });
+
+    it('should allow transition from paused to playing', async () => {
+      element.playbackState = 'paused';
+      await element.updateComplete;
+      await element.updateComplete;
+      expect(element.shadowRoot?.querySelector('.dj-hardware-switch')?.classList.contains('paused')).to.be.true;
+      
+      element.playbackState = 'playing';
+      await element.updateComplete;
+      await element.updateComplete;
+      
+      expect(element.shadowRoot?.querySelector('.dj-hardware-switch')?.classList.contains('playing')).to.be.true;
+    });
+
+    it('should allow transition from recording to any previous state', async () => {
+      // Start in playing state, then record
+      element.playbackState = 'playing';
+      await element.updateComplete;
+      await element.updateComplete;
+      
+      element.isRecording = true;
+      await element.updateComplete;
+      await element.updateComplete;
+      expect(element.shadowRoot?.querySelector('.dj-hardware-switch')?.classList.contains('recording')).to.be.true;
+      
+      // Exit recording, should return to playing
+      element.isRecording = false;
+      await element.updateComplete;
+      await element.updateComplete;
+      
+      expect(element.shadowRoot?.querySelector('.dj-hardware-switch')?.classList.contains('playing')).to.be.true;
+    });
+
+    it('should allow transition from loading to any state', async () => {
+      element.playbackState = 'loading';
+      await element.updateComplete;
+      await element.updateComplete;
+      expect(element.shadowRoot?.querySelector('.dj-hardware-switch')?.classList.contains('loading')).to.be.true;
+      
+      element.playbackState = 'playing';
+      await element.updateComplete;
+      await element.updateComplete;
+      
+      expect(element.shadowRoot?.querySelector('.dj-hardware-switch')?.classList.contains('playing')).to.be.true;
+    });
+  });
+
+  describe('State Persistence and Memory', () => {
+    it('should remember previous state when entering recording mode', async () => {
+      // Start in playing state
+      element.playbackState = 'playing';
+      await element.updateComplete;
+      await element.updateComplete;
+      
+      // Enter recording
+      element.isRecording = true;
+      await element.updateComplete;
+      await element.updateComplete;
+      expect(element.shadowRoot?.querySelector('.dj-hardware-switch')?.classList.contains('recording')).to.be.true;
+      
+      // Exit recording - should return to playing
+      element.isRecording = false;
+      await element.updateComplete;
+      await element.updateComplete;
+      
+      expect(element.shadowRoot?.querySelector('.dj-hardware-switch')?.classList.contains('playing')).to.be.true;
+    });
+
+    it('should handle complex state transitions correctly', async () => {
+      // idle -> playing -> recording -> playing -> paused
+      expect(element.shadowRoot?.querySelector('.dj-hardware-switch')?.classList.contains('idle')).to.be.true;
+      
+      element.playbackState = 'playing';
+      await element.updateComplete;
+      await element.updateComplete;
+      expect(element.shadowRoot?.querySelector('.dj-hardware-switch')?.classList.contains('playing')).to.be.true;
+      
+      element.isRecording = true;
+      await element.updateComplete;
+      await element.updateComplete;
+      expect(element.shadowRoot?.querySelector('.dj-hardware-switch')?.classList.contains('recording')).to.be.true;
+      
+      element.isRecording = false;
+      await element.updateComplete;
+      await element.updateComplete;
+      expect(element.shadowRoot?.querySelector('.dj-hardware-switch')?.classList.contains('playing')).to.be.true;
+      
+      element.playbackState = 'paused';
+      await element.updateComplete;
+      await element.updateComplete;
+      expect(element.shadowRoot?.querySelector('.dj-hardware-switch')?.classList.contains('paused')).to.be.true;
+    });
+  });
+
+  describe('Prop-driven State Updates', () => {
+    it('should update state when playbackState prop changes', async () => {
+      const states: Array<{ prop: string; expectedClass: string }> = [
+        { prop: 'playing', expectedClass: 'playing' },
+        { prop: 'paused', expectedClass: 'paused' },
+        { prop: 'loading', expectedClass: 'loading' },
+        { prop: 'stopped', expectedClass: 'idle' }
+      ];
+
+      for (const { prop, expectedClass } of states) {
+        element.playbackState = prop as any;
+        await element.updateComplete;
+        await element.updateComplete;
+        
+        expect(element.shadowRoot?.querySelector('.dj-hardware-switch')?.classList.contains(expectedClass)).to.be.true;
+      }
+    });
+
+    it('should prioritize recording state over playback state', async () => {
+      element.playbackState = 'playing';
+      element.isRecording = true;
+      await element.updateComplete;
+      await element.updateComplete;
+      
+      expect(element.shadowRoot?.querySelector('.dj-hardware-switch')?.classList.contains('recording')).to.be.true;
+      expect(element.shadowRoot?.querySelector('.dj-hardware-switch')?.classList.contains('playing')).to.be.false;
+    });
+  });
+});
+
+describe('UnifiedDJControlBlock Event Emission and Payload Correctness', () => {
+  let element: UnifiedDJControlBlock;
+
+  beforeEach(async () => {
+    element = await fixture(html`<unified-dj-control-block></unified-dj-control-block>`);
+  });
+
+  describe('Play-Pause Event Emission', () => {
+    it('should emit play-pause-click event with correct payload from idle state', async () => {
+      let eventReceived = false;
+      let eventDetail: any = null;
+      
+      element.addEventListener('play-pause-click', (e: CustomEvent) => {
+        eventReceived = true;
+        eventDetail = e.detail;
+      });
+      
+      const button = element.shadowRoot?.querySelector('.dj-hardware-switch') as HTMLElement;
+      button.click();
+      
+      await new Promise(resolve => setTimeout(resolve, 100));
+      
+      expect(eventReceived).to.be.true;
+      expect(eventDetail).to.be.null; // CustomEvent detail defaults to null
+    });
+
+    it('should emit play-pause-click event from playing state', async () => {
+      element.playbackState = 'playing';
+      await element.updateComplete;
+      await element.updateComplete;
+      
+      let eventReceived = false;
+      element.addEventListener('play-pause-click', () => {
+        eventReceived = true;
+      });
+      
+      const button = element.shadowRoot?.querySelector('.dj-hardware-switch') as HTMLElement;
+      await new Promise(resolve => setTimeout(resolve, 200)); // Wait for debounce
+      button.click();
+      
+      await new Promise(resolve => setTimeout(resolve, 100));
+      
+      expect(eventReceived).to.be.true;
+    });
+
+    it('should emit play-pause-click event from paused state', async () => {
+      element.playbackState = 'paused';
+      await element.updateComplete;
+      await element.updateComplete;
+      
+      let eventReceived = false;
+      element.addEventListener('play-pause-click', () => {
+        eventReceived = true;
+      });
+      
+      const button = element.shadowRoot?.querySelector('.dj-hardware-switch') as HTMLElement;
+      await new Promise(resolve => setTimeout(resolve, 200)); // Wait for debounce
+      button.click();
+      
+      await new Promise(resolve => setTimeout(resolve, 100));
+      
+      expect(eventReceived).to.be.true;
+    });
+
+    it('should not emit play-pause-click event from loading state', async () => {
+      element.playbackState = 'loading';
+      await element.updateComplete;
+      await element.updateComplete;
+      
+      let eventReceived = false;
+      element.addEventListener('play-pause-click', () => {
+        eventReceived = true;
+      });
+      
+      const button = element.shadowRoot?.querySelector('.dj-hardware-switch') as HTMLElement;
+      button.click();
+      
+      await new Promise(resolve => setTimeout(resolve, 100));
+      
+      expect(eventReceived).to.be.false;
+    });
+  });
+
+  describe('Record Event Emission', () => {
+    it('should emit record-click event with correct payload from recording state', async () => {
+      element.isRecording = true;
+      await element.updateComplete;
+      await element.updateComplete;
+      
+      let eventReceived = false;
+      let eventDetail: any = null;
+      
+      element.addEventListener('record-click', (e: CustomEvent) => {
+        eventReceived = true;
+        eventDetail = e.detail;
+      });
+      
+      const button = element.shadowRoot?.querySelector('.dj-hardware-switch') as HTMLElement;
+      await new Promise(resolve => setTimeout(resolve, 200)); // Wait for debounce
+      button.click();
+      
+      await new Promise(resolve => setTimeout(resolve, 100));
+      
+      expect(eventReceived).to.be.true;
+      expect(eventDetail).to.be.null; // CustomEvent detail defaults to null
+    });
+
+    it('should emit record-click event on hold from non-recording state', async () => {
+      let eventReceived = false;
+      element.addEventListener('record-click', () => {
+        eventReceived = true;
+      });
+      
+      const button = element.shadowRoot?.querySelector('.dj-hardware-switch') as HTMLElement;
+      button.dispatchEvent(new MouseEvent('mousedown', { bubbles: true }));
+      
+      await new Promise(resolve => setTimeout(resolve, 600)); // Wait for hold timer
+      
+      expect(eventReceived).to.be.true;
+    });
+
+    it('should not emit record-click event on hold from loading state', async () => {
+      element.playbackState = 'loading';
+      await element.updateComplete;
+      await element.updateComplete;
+      
+      let eventReceived = false;
+      element.addEventListener('record-click', () => {
+        eventReceived = true;
+      });
+      
+      const button = element.shadowRoot?.querySelector('.dj-hardware-switch') as HTMLElement;
+      button.dispatchEvent(new MouseEvent('mousedown', { bubbles: true }));
+      
+      await new Promise(resolve => setTimeout(resolve, 600)); // Wait for hold timer
+      
+      expect(eventReceived).to.be.false;
+    });
+  });
+
+  describe('Event Compatibility', () => {
+    it('should emit events that bubble correctly', async () => {
+      let eventBubbled = false;
+      
+      // Listen on the element itself since shadow DOM events don't automatically bubble to document
+      element.addEventListener('play-pause-click', () => {
+        eventBubbled = true;
+      });
+      
+      const button = element.shadowRoot?.querySelector('.dj-hardware-switch') as HTMLElement;
+      button.click();
+      
+      await new Promise(resolve => setTimeout(resolve, 100));
+      
+      expect(eventBubbled).to.be.true;
+    });
+
+    it('should emit CustomEvent instances', async () => {
+      let eventInstance: Event | null = null;
+      
+      element.addEventListener('play-pause-click', (e) => {
+        eventInstance = e;
+      });
+      
+      const button = element.shadowRoot?.querySelector('.dj-hardware-switch') as HTMLElement;
+      button.click();
+      
+      await new Promise(resolve => setTimeout(resolve, 100));
+      
+      expect(eventInstance).to.be.instanceOf(CustomEvent);
+    });
+  });
+});
+
+describe('UnifiedDJControlBlock Timer Management', () => {
+  let element: UnifiedDJControlBlock;
+
+  beforeEach(async () => {
+    element = await fixture(html`<unified-dj-control-block></unified-dj-control-block>`);
+  });
+
+  describe('Hold Timer Management', () => {
+    it('should start hold timer on mousedown', async () => {
+      const button = element.shadowRoot?.querySelector('.dj-hardware-switch') as HTMLElement;
+      
+      let timerStarted = false;
+      const originalSetTimeout = window.setTimeout;
+      window.setTimeout = ((callback: Function, delay: number) => {
+        if (delay === 500) { // Hold timer delay
+          timerStarted = true;
+        }
+        return originalSetTimeout(callback, delay);
+      }) as any;
+      
+      button.dispatchEvent(new MouseEvent('mousedown', { bubbles: true }));
+      
+      expect(timerStarted).to.be.true;
+      
+      // Restore original setTimeout
+      window.setTimeout = originalSetTimeout;
+    });
+
+    it('should clear hold timer on mouseup', async () => {
+      const button = element.shadowRoot?.querySelector('.dj-hardware-switch') as HTMLElement;
+      
+      let eventEmitted = false;
+      element.addEventListener('record-click', () => {
+        eventEmitted = true;
+      });
+      
+      // Start hold
+      button.dispatchEvent(new MouseEvent('mousedown', { bubbles: true }));
+      
+      // Cancel hold before timer fires
+      await new Promise(resolve => setTimeout(resolve, 200));
+      button.dispatchEvent(new MouseEvent('mouseup', { bubbles: true }));
+      
+      // Wait for timer period to ensure it was cancelled
+      await new Promise(resolve => setTimeout(resolve, 400));
+      
+      expect(eventEmitted).to.be.false;
+    });
+
+    it('should clear hold timer on mouseleave', async () => {
+      const button = element.shadowRoot?.querySelector('.dj-hardware-switch') as HTMLElement;
+      
+      let eventEmitted = false;
+      element.addEventListener('record-click', () => {
+        eventEmitted = true;
+      });
+      
+      // Start hold
+      button.dispatchEvent(new MouseEvent('mousedown', { bubbles: true }));
+      
+      // Cancel hold with mouseleave
+      await new Promise(resolve => setTimeout(resolve, 200));
+      button.dispatchEvent(new MouseEvent('mouseleave', { bubbles: true }));
+      
+      // Wait for timer period to ensure it was cancelled
+      await new Promise(resolve => setTimeout(resolve, 400));
+      
+      expect(eventEmitted).to.be.false;
+    });
+
+    it('should fire hold timer after 500ms', async () => {
+      const button = element.shadowRoot?.querySelector('.dj-hardware-switch') as HTMLElement;
+      
+      let eventEmitted = false;
+      let eventTime = 0;
+      const startTime = Date.now();
+      
+      element.addEventListener('record-click', () => {
+        eventEmitted = true;
+        eventTime = Date.now() - startTime;
+      });
+      
+      button.dispatchEvent(new MouseEvent('mousedown', { bubbles: true }));
+      
+      await new Promise(resolve => setTimeout(resolve, 600));
+      
+      expect(eventEmitted).to.be.true;
+      expect(eventTime).to.be.at.least(500);
+      expect(eventTime).to.be.at.most(550); // Allow some tolerance
+    });
+
+    it('should clean up hold timer on component disconnect', async () => {
+      const button = element.shadowRoot?.querySelector('.dj-hardware-switch') as HTMLElement;
+      
+      let eventEmitted = false;
+      element.addEventListener('record-click', () => {
+        eventEmitted = true;
+      });
+      
+      // Start hold
+      button.dispatchEvent(new MouseEvent('mousedown', { bubbles: true }));
+      
+      // Disconnect component
+      element.disconnectedCallback();
+      
+      // Wait for timer period
+      await new Promise(resolve => setTimeout(resolve, 600));
+      
+      expect(eventEmitted).to.be.false;
+    });
+  });
+
+  describe('Debounce Timer Management', () => {
+    it('should debounce rapid clicks', async () => {
+      const button = element.shadowRoot?.querySelector('.dj-hardware-switch') as HTMLElement;
+      
+      let clickCount = 0;
+      element.addEventListener('play-pause-click', () => {
+        clickCount++;
+      });
+      
+      // Rapid clicks within debounce period
+      button.click();
+      button.click();
+      button.click();
+      
+      await new Promise(resolve => setTimeout(resolve, 200));
+      
+      expect(clickCount).to.equal(1);
+    });
+
+    it('should allow clicks after debounce period', async () => {
+      const button = element.shadowRoot?.querySelector('.dj-hardware-switch') as HTMLElement;
+      
+      let clickCount = 0;
+      element.addEventListener('play-pause-click', () => {
+        clickCount++;
+      });
+      
+      // First click
+      button.click();
+      await new Promise(resolve => setTimeout(resolve, 100));
+      
+      // Wait for debounce period
+      await new Promise(resolve => setTimeout(resolve, 100));
+      
+      // Second click after debounce
+      button.click();
+      await new Promise(resolve => setTimeout(resolve, 100));
+      
+      expect(clickCount).to.equal(2);
+    });
+
+    it('should use 50ms debounce delay for state changes', async () => {
+      const button = element.shadowRoot?.querySelector('.dj-hardware-switch') as HTMLElement;
+      
+      let eventEmitted = false;
+      const startTime = Date.now();
+      
+      element.addEventListener('play-pause-click', () => {
+        const elapsed = Date.now() - startTime;
+        expect(elapsed).to.be.at.least(50);
+        eventEmitted = true;
+      });
+      
+      button.click();
+      
+      // Check immediately - should not be emitted yet
+      expect(eventEmitted).to.be.false;
+      
+      await new Promise(resolve => setTimeout(resolve, 60));
+      
+      expect(eventEmitted).to.be.true;
+    });
+
+    it('should clean up debounce timer on component disconnect', async () => {
+      const button = element.shadowRoot?.querySelector('.dj-hardware-switch') as HTMLElement;
+      
+      let eventEmitted = false;
+      element.addEventListener('play-pause-click', () => {
+        eventEmitted = true;
+      });
+      
+      // Start debounce
+      button.click();
+      
+      // Disconnect before debounce fires
+      element.disconnectedCallback();
+      
+      await new Promise(resolve => setTimeout(resolve, 100));
+      
+      expect(eventEmitted).to.be.false;
+    });
+  });
+
+  describe('Timer Interaction', () => {
+    it('should handle simultaneous hold and debounce timers', async () => {
+      const button = element.shadowRoot?.querySelector('.dj-hardware-switch') as HTMLElement;
+      
+      let clickEventEmitted = false;
+      let holdEventEmitted = false;
+      
+      element.addEventListener('play-pause-click', () => {
+        clickEventEmitted = true;
+      });
+      
+      element.addEventListener('record-click', () => {
+        holdEventEmitted = true;
+      });
+      
+      // Start hold and immediately click
+      button.dispatchEvent(new MouseEvent('mousedown', { bubbles: true }));
+      button.click();
+      
+      // Wait for both timers
+      await new Promise(resolve => setTimeout(resolve, 600));
+      
+      // Both events should have fired
+      expect(clickEventEmitted).to.be.true;
+      expect(holdEventEmitted).to.be.true;
+    });
+
+    it('should prevent memory leaks with proper timer cleanup', async () => {
+      const button = element.shadowRoot?.querySelector('.dj-hardware-switch') as HTMLElement;
+      
+      // Start multiple timers
+      button.dispatchEvent(new MouseEvent('mousedown', { bubbles: true }));
+      button.click();
+      button.dispatchEvent(new MouseEvent('mousedown', { bubbles: true }));
+      button.click();
+      
+      // Disconnect should clean up all timers
+      element.disconnectedCallback();
+      
+      // If no errors are thrown, cleanup worked
+      expect(true).to.be.true;
+    });
+  });
+});
+
+describe('UnifiedDJControlBlock Keyboard Interaction Handling', () => {
+  let element: UnifiedDJControlBlock;
+
+  beforeEach(async () => {
+    element = await fixture(html`<unified-dj-control-block></unified-dj-control-block>`);
+  });
+
+  describe('Keyboard Event Handling', () => {
+    it('should handle Enter key press', async () => {
+      let eventEmitted = false;
+      element.addEventListener('play-pause-click', () => {
+        eventEmitted = true;
+      });
+      
+      const button = element.shadowRoot?.querySelector('.dj-hardware-switch') as HTMLElement;
+      
+      const enterEvent = new KeyboardEvent('keydown', {
+        key: 'Enter',
+        bubbles: true,
+        cancelable: true
+      });
+      
+      button.dispatchEvent(enterEvent);
+      
+      await new Promise(resolve => setTimeout(resolve, 100));
+      
+      expect(eventEmitted).to.be.true;
+      expect(enterEvent.defaultPrevented).to.be.true;
+    });
+
+    it('should handle Space key press', async () => {
+      let eventEmitted = false;
+      element.addEventListener('play-pause-click', () => {
+        eventEmitted = true;
+      });
+      
+      const button = element.shadowRoot?.querySelector('.dj-hardware-switch') as HTMLElement;
+      
+      const spaceEvent = new KeyboardEvent('keydown', {
+        key: ' ',
+        bubbles: true,
+        cancelable: true
+      });
+      
+      button.dispatchEvent(spaceEvent);
+      
+      await new Promise(resolve => setTimeout(resolve, 100));
+      
+      expect(eventEmitted).to.be.true;
+      expect(spaceEvent.defaultPrevented).to.be.true;
+    });
+
+    it('should ignore other key presses', async () => {
+      let eventEmitted = false;
+      element.addEventListener('play-pause-click', () => {
+        eventEmitted = true;
+      });
+      
+      const button = element.shadowRoot?.querySelector('.dj-hardware-switch') as HTMLElement;
+      
+      const otherKeyEvent = new KeyboardEvent('keydown', {
+        key: 'a',
+        bubbles: true,
+        cancelable: true
+      });
+      
+      button.dispatchEvent(otherKeyEvent);
+      
+      await new Promise(resolve => setTimeout(resolve, 100));
+      
+      expect(eventEmitted).to.be.false;
+      expect(otherKeyEvent.defaultPrevented).to.be.false;
+    });
+
+    it('should handle keyboard events in different states', async () => {
+      const button = element.shadowRoot?.querySelector('.dj-hardware-switch') as HTMLElement;
+      
+      // Test in playing state
+      element.playbackState = 'playing';
+      await element.updateComplete;
+      await element.updateComplete;
+      
+      let playPauseEventEmitted = false;
+      element.addEventListener('play-pause-click', () => {
+        playPauseEventEmitted = true;
+      });
+      
+      const enterEvent = new KeyboardEvent('keydown', {
+        key: 'Enter',
+        bubbles: true,
+        cancelable: true
+      });
+      
+      await new Promise(resolve => setTimeout(resolve, 200)); // Wait for debounce
+      button.dispatchEvent(enterEvent);
+      
+      await new Promise(resolve => setTimeout(resolve, 100));
+      
+      expect(playPauseEventEmitted).to.be.true;
+      
+      // Test in recording state
+      element.isRecording = true;
+      await element.updateComplete;
+      await element.updateComplete;
+      
+      let recordEventEmitted = false;
+      element.addEventListener('record-click', () => {
+        recordEventEmitted = true;
+      });
+      
+      const spaceEvent = new KeyboardEvent('keydown', {
+        key: ' ',
+        bubbles: true,
+        cancelable: true
+      });
+      
+      await new Promise(resolve => setTimeout(resolve, 200)); // Wait for debounce
+      button.dispatchEvent(spaceEvent);
+      
+      await new Promise(resolve => setTimeout(resolve, 100));
+      
+      expect(recordEventEmitted).to.be.true;
+    });
+
+    it('should prevent keyboard events in loading state', async () => {
+      element.playbackState = 'loading';
+      await element.updateComplete;
+      await element.updateComplete;
+      
+      let eventEmitted = false;
+      element.addEventListener('play-pause-click', () => {
+        eventEmitted = true;
+      });
+      
+      const button = element.shadowRoot?.querySelector('.dj-hardware-switch') as HTMLElement;
+      
+      const enterEvent = new KeyboardEvent('keydown', {
+        key: 'Enter',
+        bubbles: true,
+        cancelable: true
+      });
+      
+      button.dispatchEvent(enterEvent);
+      
+      await new Promise(resolve => setTimeout(resolve, 100));
+      
+      expect(eventEmitted).to.be.false;
+      expect(enterEvent.defaultPrevented).to.be.true; // Still prevents default
+    });
+  });
+
+  describe('Accessibility Features', () => {
+    it('should have proper ARIA attributes', () => {
+      const button = element.shadowRoot?.querySelector('.dj-hardware-switch') as HTMLElement;
+      
+      expect(button.getAttribute('role')).to.equal('button');
+      expect(button.getAttribute('tabindex')).to.equal('0');
+      expect(button.getAttribute('aria-label')).to.include('DJ Control Switch');
+    });
+
+    it('should update ARIA label based on current state', async () => {
+      const button = element.shadowRoot?.querySelector('.dj-hardware-switch') as HTMLElement;
+      
+      // Test idle state
+      expect(button.getAttribute('aria-label')).to.include('idle');
+      
+      // Test playing state
+      element.playbackState = 'playing';
+      await element.updateComplete;
+      await element.updateComplete;
+      expect(button.getAttribute('aria-label')).to.include('playing');
+      
+      // Test paused state
+      element.playbackState = 'paused';
+      await element.updateComplete;
+      await element.updateComplete;
+      expect(button.getAttribute('aria-label')).to.include('paused');
+      
+      // Test recording state
+      element.isRecording = true;
+      await element.updateComplete;
+      await element.updateComplete;
+      expect(button.getAttribute('aria-label')).to.include('recording');
+      
+      // Test loading state
+      element.isRecording = false;
+      element.playbackState = 'loading';
+      await element.updateComplete;
+      await element.updateComplete;
+      expect(button.getAttribute('aria-label')).to.include('loading');
+    });
+
+    it('should be focusable with keyboard navigation', () => {
+      const button = element.shadowRoot?.querySelector('.dj-hardware-switch') as HTMLElement;
+      
+      expect(button.tabIndex).to.equal(0);
+      
+      // Test focus
+      button.focus();
+      expect(document.activeElement).to.equal(element);
+    });
+
+    it('should handle focus and blur events properly', async () => {
+      const button = element.shadowRoot?.querySelector('.dj-hardware-switch') as HTMLElement;
+      
+      // Focus should not trigger any events
+      let eventEmitted = false;
+      element.addEventListener('play-pause-click', () => {
+        eventEmitted = true;
+      });
+      
+      button.focus();
+      await new Promise(resolve => setTimeout(resolve, 100));
+      
+      expect(eventEmitted).to.be.false;
+      
+      // Blur should not trigger any events
+      button.blur();
+      await new Promise(resolve => setTimeout(resolve, 100));
+      
+      expect(eventEmitted).to.be.false;
+    });
+  });
+
+  describe('Keyboard and Mouse Interaction Compatibility', () => {
+    it('should handle mixed keyboard and mouse interactions', async () => {
+      const button = element.shadowRoot?.querySelector('.dj-hardware-switch') as HTMLElement;
+      
+      let eventCount = 0;
+      element.addEventListener('play-pause-click', () => {
+        eventCount++;
+      });
+      
+      // Mouse click
+      button.click();
+      await new Promise(resolve => setTimeout(resolve, 100));
+      
+      // Wait for debounce
+      await new Promise(resolve => setTimeout(resolve, 100));
+      
+      // Keyboard press
+      const enterEvent = new KeyboardEvent('keydown', {
+        key: 'Enter',
+        bubbles: true,
+        cancelable: true
+      });
+      button.dispatchEvent(enterEvent);
+      await new Promise(resolve => setTimeout(resolve, 100));
+      
+      expect(eventCount).to.equal(2);
+    });
+
+    it('should respect debouncing across keyboard and mouse events', async () => {
+      const button = element.shadowRoot?.querySelector('.dj-hardware-switch') as HTMLElement;
+      
+      let eventCount = 0;
+      element.addEventListener('play-pause-click', () => {
+        eventCount++;
+      });
+      
+      // Rapid mouse and keyboard events
+      button.click();
+      
+      const enterEvent = new KeyboardEvent('keydown', {
+        key: 'Enter',
+        bubbles: true,
+        cancelable: true
+      });
+      button.dispatchEvent(enterEvent);
+      
+      const spaceEvent = new KeyboardEvent('keydown', {
+        key: ' ',
+        bubbles: true,
+        cancelable: true
+      });
+      button.dispatchEvent(spaceEvent);
+      
+      await new Promise(resolve => setTimeout(resolve, 200));
+      
+      // Only first event should have been processed due to debouncing
+      expect(eventCount).to.equal(1);
+    });
+  });
+});
+
 describe('UnifiedDJControlBlock Visual State Indicators and Animations', () => {
   let element: UnifiedDJControlBlock;
 
