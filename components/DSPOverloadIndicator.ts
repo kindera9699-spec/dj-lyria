@@ -15,14 +15,20 @@ export class DSPOverloadIndicator extends LitElement {
   @state() private _overloadLevel = 0;
   @state() private _currentColor = 'rgb(0, 255, 0)';
   @state() private _glowIntensity = 0;
+  @state() private _isOverloadState = false;
+  @state() private _blinkSpeed = 1;
 
-  // Progressive color stops: Green → Yellow → Red → Purple → Blue
+  private _blinkAnimationId: number | null = null;
+  private _overloadResetTimer: number | null = null;
+
+  // Progressive color stops: Green → Yellow → Red → Purple → Blue → OVERLOAD
   private readonly colorStops: OverloadColorStop[] = [
     { threshold: 0.0, color: { r: 0, g: 255, b: 0 }, name: 'Safe' },      // Green
     { threshold: 0.3, color: { r: 255, g: 255, b: 0 }, name: 'Caution' }, // Yellow  
     { threshold: 0.6, color: { r: 255, g: 0, b: 0 }, name: 'Warning' },   // Red
     { threshold: 0.8, color: { r: 128, g: 0, b: 128 }, name: 'Critical' }, // Purple
     { threshold: 1.0, color: { r: 0, g: 0, b: 255 }, name: 'Extreme' },   // Blue
+    { threshold: 1.2, color: { r: 255, g: 0, b: 0 }, name: 'OVERLOAD' },  // Red (Easter egg)
   ];
 
   static styles = css`
@@ -69,14 +75,17 @@ export class DSPOverloadIndicator extends LitElement {
     const promptAvg = this.currentPromptAverage;
     const knobExt = this.currentKnobAverageExtremeness;
 
-    // Calculate combined overload factor (0 to 1+ range)
+    // Calculate combined overload factor (0 to 1.5+ range for easter egg)
     const overloadFactor = Math.max(promptAvg, knobExt) * 2;
 
-    // Normalize to 0-1 range for color calculation
-    this._overloadLevel = Math.min(1, Math.max(0, overloadFactor - 0.2));
+    // Allow overload level to exceed 1.0 for OVERLOAD state
+    this._overloadLevel = Math.max(0, overloadFactor - 0.2);
 
     // Determine visibility - show when overload > 0.2 (20%)
     const shouldBeVisible = overloadFactor > 0.2;
+
+    // Check for OVERLOAD easter egg state (threshold 1.2)
+    const isOverloadState = this._overloadLevel >= 1.2;
 
     if (shouldBeVisible !== this._visible) {
       this._visible = shouldBeVisible;
@@ -84,6 +93,17 @@ export class DSPOverloadIndicator extends LitElement {
         this.classList.add('is-visible');
       } else {
         this.classList.remove('is-visible');
+        this._stopBlinking();
+      }
+    }
+
+    // Handle OVERLOAD state transition
+    if (isOverloadState !== this._isOverloadState) {
+      this._isOverloadState = isOverloadState;
+      if (isOverloadState) {
+        this._startOverloadSequence();
+      } else {
+        this._stopOverloadSequence();
       }
     }
 
@@ -149,6 +169,89 @@ export class DSPOverloadIndicator extends LitElement {
     }
 
     return this.colorStops[0].name;
+  }
+
+  private _startOverloadSequence() {
+    // Start with slow blinking, then accelerate
+    this._blinkSpeed = 1;
+    this._startBlinking();
+
+    // Set timer to trigger reset after 3 seconds of OVERLOAD state
+    this._overloadResetTimer = window.setTimeout(() => {
+      this._triggerReset();
+    }, 3000);
+  }
+
+  private _stopOverloadSequence() {
+    this._stopBlinking();
+    if (this._overloadResetTimer) {
+      clearTimeout(this._overloadResetTimer);
+      this._overloadResetTimer = null;
+    }
+  }
+
+  private _startBlinking() {
+    if (this._blinkAnimationId !== null) return;
+
+    let blinkCount = 0;
+    const maxBlinks = 30; // Total blinks before reset
+
+    const blink = () => {
+      if (!this._isOverloadState) {
+        this._stopBlinking();
+        return;
+      }
+
+      // Accelerate blinking: start at 500ms, end at 50ms
+      const progress = blinkCount / maxBlinks;
+      const blinkInterval = 500 - (progress * 450); // 500ms -> 50ms
+
+      // Toggle visibility for blink effect
+      const isVisible = blinkCount % 2 === 0;
+      this.style.opacity = isVisible ? '1' : '0.3';
+
+      blinkCount++;
+
+      if (blinkCount < maxBlinks) {
+        this._blinkAnimationId = window.setTimeout(blink, blinkInterval);
+      } else {
+        // Max blinks reached, trigger reset
+        this._triggerReset();
+      }
+    };
+
+    blink();
+  }
+
+  private _stopBlinking() {
+    if (this._blinkAnimationId !== null) {
+      clearTimeout(this._blinkAnimationId);
+      this._blinkAnimationId = null;
+    }
+    // Restore normal opacity
+    this.style.opacity = '';
+  }
+
+  private _triggerReset() {
+    // Dispatch custom event to trigger the main app's resetAll method
+    this.dispatchEvent(new CustomEvent('dsp-overload-reset', {
+      bubbles: true,
+      composed: true,
+      detail: { message: 'DSP Overload triggered system reset!' }
+    }));
+
+    // Clean up overload state
+    this._stopOverloadSequence();
+    this._isOverloadState = false;
+  }
+
+  override connectedCallback() {
+    super.connectedCallback();
+  }
+
+  override disconnectedCallback() {
+    super.disconnectedCallback();
+    this._stopOverloadSequence();
   }
 
   render() {

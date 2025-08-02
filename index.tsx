@@ -2440,6 +2440,17 @@ export class PromptDjMidi extends LitElement {
     // isRecordingActive state is updated within startRecording/stopRecording's onstop
     // and because it's a @state property, Lit should handle re-rendering the record-button.
   }
+
+  private handleDspOverloadReset(event: CustomEvent) {
+    console.log('🚨 DSP OVERLOAD DETECTED! Triggering system reset...', event.detail);
+    
+    // Add a small delay for dramatic effect
+    setTimeout(() => {
+      this.resetAll();
+      console.log('✅ System reset completed due to DSP overload');
+    }, 100);
+  }
+
   private resetAll() {
     this.config = { ...PromptDjMidi.INITIAL_CONFIG };
 
@@ -3007,6 +3018,7 @@ ${this.renderPrompts()}
             .currentKnobAverageExtremeness=${this.knobAverageExtremeness}
             .indicatorColor=${this.dspOverloadIndicatorColor}
             .blinkDuration=${this.dspOverloadBlinkDuration}
+            @dsp-overload-reset=${this.handleDspOverloadReset}
           ></dsp-overload-indicator>
           <unified-dj-control-block
             .playbackState=${this.playbackState}
