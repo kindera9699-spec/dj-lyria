@@ -514,3 +514,190 @@ describe('UnifiedDJControlBlock Click and Hold Interaction', () => {
     });
   });
 });
+
+describe('UnifiedDJControlBlock Visual State Indicators and Animations', () => {
+  let element: UnifiedDJControlBlock;
+
+  beforeEach(async () => {
+    element = await fixture(html`<unified-dj-control-block></unified-dj-control-block>`);
+  });
+
+  describe('Distinct Visual States', () => {
+    it('should apply idle state CSS class', async () => {
+      const button = element.shadowRoot?.querySelector('.dj-hardware-switch') as HTMLElement;
+      expect(button.classList.contains('idle')).to.be.true;
+    });
+
+    it('should apply playing state CSS class', async () => {
+      element.playbackState = 'playing';
+      await element.updateComplete;
+      await element.updateComplete; // Wait for another update cycle
+      
+      const button = element.shadowRoot?.querySelector('.dj-hardware-switch') as HTMLElement;
+      expect(button.classList.contains('playing')).to.be.true;
+      expect(button.classList.contains('idle')).to.be.false;
+    });
+
+    it('should apply paused state CSS class', async () => {
+      element.playbackState = 'paused';
+      await element.updateComplete;
+      await element.updateComplete; // Wait for another update cycle
+      
+      const button = element.shadowRoot?.querySelector('.dj-hardware-switch') as HTMLElement;
+      expect(button.classList.contains('paused')).to.be.true;
+      expect(button.classList.contains('idle')).to.be.false;
+    });
+
+    it('should apply recording state CSS class', async () => {
+      element.isRecording = true;
+      await element.updateComplete;
+      await element.updateComplete; // Wait for another update cycle
+      
+      const button = element.shadowRoot?.querySelector('.dj-hardware-switch') as HTMLElement;
+      expect(button.classList.contains('recording')).to.be.true;
+      expect(button.classList.contains('idle')).to.be.false;
+    });
+
+    it('should apply loading state CSS class', async () => {
+      element.playbackState = 'loading';
+      await element.updateComplete;
+      await element.updateComplete; // Wait for another update cycle
+      
+      const button = element.shadowRoot?.querySelector('.dj-hardware-switch') as HTMLElement;
+      expect(button.classList.contains('loading')).to.be.true;
+      expect(button.classList.contains('idle')).to.be.false;
+    });
+  });
+
+  describe('Smooth CSS Transitions', () => {
+    it('should have CSS transition classes applied', () => {
+      const button = element.shadowRoot?.querySelector('.dj-hardware-switch') as HTMLElement;
+      const icon = element.shadowRoot?.querySelector('.switch-icon') as HTMLElement;
+      
+      // Verify elements exist and have the correct classes for transitions
+      expect(button).to.not.be.null;
+      expect(icon).to.not.be.null;
+      expect(button.classList.contains('dj-hardware-switch')).to.be.true;
+      expect(icon.classList.contains('switch-icon')).to.be.true;
+    });
+
+    it('should smoothly transition between states', async () => {
+      const button = element.shadowRoot?.querySelector('.dj-hardware-switch') as HTMLElement;
+      
+      // Start in idle state
+      expect(button.classList.contains('idle')).to.be.true;
+      
+      // Transition to playing state
+      element.playbackState = 'playing';
+      await element.updateComplete;
+      await element.updateComplete; // Wait for another update cycle
+      
+      // Verify new state is applied
+      expect(button.classList.contains('playing')).to.be.true;
+      expect(button.classList.contains('idle')).to.be.false;
+    });
+  });
+
+  describe('Recording State Pulsing Animation', () => {
+    it('should apply recording CSS class with animation', async () => {
+      element.isRecording = true;
+      await element.updateComplete;
+      await element.updateComplete; // Wait for another update cycle
+      
+      const button = element.shadowRoot?.querySelector('.dj-hardware-switch') as HTMLElement;
+      
+      // Verify that recording class is applied (which has the animation in CSS)
+      expect(button.classList.contains('recording')).to.be.true;
+    });
+
+    it('should remove recording animation when exiting recording state', async () => {
+      // Enter recording state
+      element.isRecording = true;
+      await element.updateComplete;
+      await element.updateComplete; // Wait for another update cycle
+      
+      // Exit recording state
+      element.isRecording = false;
+      await element.updateComplete;
+      await element.updateComplete; // Wait for another update cycle
+      
+      const button = element.shadowRoot?.querySelector('.dj-hardware-switch') as HTMLElement;
+      
+      // Verify that recording class is no longer applied
+      expect(button.classList.contains('recording')).to.be.false;
+    });
+  });
+
+  describe('Loading Spinner Animation', () => {
+    it('should apply loading CSS class with animation', async () => {
+      element.playbackState = 'loading';
+      await element.updateComplete;
+      await element.updateComplete; // Wait for another update cycle
+      
+      const button = element.shadowRoot?.querySelector('.dj-hardware-switch') as HTMLElement;
+      
+      // Verify that loading class is applied (which has the animation in CSS)
+      expect(button.classList.contains('loading')).to.be.true;
+    });
+
+    it('should remove loading animation when exiting loading state', async () => {
+      // Enter loading state
+      element.playbackState = 'loading';
+      await element.updateComplete;
+      await element.updateComplete; // Wait for another update cycle
+      
+      // Exit loading state
+      element.playbackState = 'idle';
+      await element.updateComplete;
+      await element.updateComplete; // Wait for another update cycle
+      
+      const button = element.shadowRoot?.querySelector('.dj-hardware-switch') as HTMLElement;
+      
+      // Verify that loading class is no longer applied
+      expect(button.classList.contains('loading')).to.be.false;
+    });
+  });
+
+  describe('Icon State Indicators', () => {
+    it('should display correct icon for idle state', () => {
+      const icon = element.shadowRoot?.querySelector('.switch-icon') as HTMLElement;
+      expect(icon.textContent).to.equal('▶️'); // Play icon
+    });
+
+    it('should display correct icon for playing state', async () => {
+      element.playbackState = 'playing';
+      await element.updateComplete;
+      await element.updateComplete; // Wait for another update cycle
+      
+      const icon = element.shadowRoot?.querySelector('.switch-icon') as HTMLElement;
+      expect(icon.textContent).to.equal('⏸️'); // Pause icon
+    });
+
+    it('should display correct icon for paused state', async () => {
+      element.playbackState = 'paused';
+      await element.updateComplete;
+      await element.updateComplete; // Wait for another update cycle
+      
+      const icon = element.shadowRoot?.querySelector('.switch-icon') as HTMLElement;
+      expect(icon.textContent).to.equal('▶️'); // Play icon
+    });
+
+    it('should display correct icon for recording state', async () => {
+      element.isRecording = true;
+      await element.updateComplete;
+      await element.updateComplete; // Wait for another update cycle
+      
+      const icon = element.shadowRoot?.querySelector('.switch-icon') as HTMLElement;
+      expect(icon.textContent).to.equal('⏺️'); // Record icon
+    });
+
+    it('should display correct icon for loading state', async () => {
+      element.playbackState = 'loading';
+      await element.updateComplete;
+      await element.updateComplete; // Wait for another update cycle
+      
+      const icon = element.shadowRoot?.querySelector('.switch-icon') as HTMLElement;
+      expect(icon.textContent).to.equal('⟳'); // Loading/refresh icon
+    });
+  });
+});

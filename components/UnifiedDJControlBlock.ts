@@ -172,7 +172,7 @@ export class UnifiedDJControlBlock extends LitElement {
       filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.5));
     }
 
-    /* State-specific styling with enhanced hardware aesthetics */
+    /* Enhanced state-specific styling with distinct visual indicators */
     .dj-hardware-switch.idle {
       background: 
         linear-gradient(145deg, 
@@ -181,119 +181,204 @@ export class UnifiedDJControlBlock extends LitElement {
           #1a1a1a 50%, 
           #0a0a0a 75%, 
           #000000 100%);
+      border-color: #444;
+      box-shadow: 
+        inset 0 2px 4px rgba(255, 255, 255, 0.08),
+        inset 0 -2px 4px rgba(0, 0, 0, 0.6),
+        inset 2px 0 3px rgba(255, 255, 255, 0.05),
+        inset -2px 0 3px rgba(0, 0, 0, 0.3),
+        0 4px 8px rgba(0, 0, 0, 0.4),
+        0 0 0 1px rgba(255, 255, 255, 0.02);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
     .dj-hardware-switch.idle .switch-icon {
       color: #666;
-      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
+      text-shadow: 
+        0 1px 2px rgba(0, 0, 0, 0.8),
+        0 0 4px rgba(255, 255, 255, 0.05);
+      transition: all 0.3s ease;
+    }
+
+    .dj-hardware-switch.idle:hover .switch-icon {
+      color: #888;
+      text-shadow: 
+        0 1px 2px rgba(0, 0, 0, 0.8),
+        0 0 6px rgba(255, 255, 255, 0.1);
     }
 
     .dj-hardware-switch.playing {
       background: 
         linear-gradient(145deg, 
-          #0088ff 0%, 
-          #0066cc 25%, 
-          #004499 50%, 
-          #003366 75%, 
-          #002244 100%);
-      border-color: #00aaff;
+          #00aaff 0%, 
+          #0088cc 25%, 
+          #0066aa 50%, 
+          #004488 75%, 
+          #003366 100%);
+      border-color: #00ccff;
       box-shadow: 
-        inset 0 2px 4px rgba(255, 255, 255, 0.2),
+        inset 0 2px 4px rgba(255, 255, 255, 0.25),
         inset 0 -2px 4px rgba(0, 0, 0, 0.4),
-        inset 2px 0 3px rgba(255, 255, 255, 0.1),
+        inset 2px 0 3px rgba(255, 255, 255, 0.15),
         inset -2px 0 3px rgba(0, 0, 0, 0.2),
-        0 4px 8px rgba(0, 136, 255, 0.3),
-        0 0 12px rgba(0, 136, 255, 0.2);
+        0 4px 12px rgba(0, 170, 255, 0.4),
+        0 0 16px rgba(0, 170, 255, 0.3),
+        0 0 0 1px rgba(0, 204, 255, 0.5);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
     .dj-hardware-switch.playing .switch-icon {
-      color: #fff;
+      color: #ffffff;
       text-shadow: 
         0 1px 2px rgba(0, 0, 0, 0.8),
-        0 0 6px rgba(0, 136, 255, 0.5);
+        0 0 8px rgba(0, 170, 255, 0.6),
+        0 0 12px rgba(255, 255, 255, 0.2);
+      transition: all 0.3s ease;
     }
 
     .dj-hardware-switch.paused {
       background: 
         linear-gradient(145deg, 
-          #888 0%, 
-          #666 25%, 
-          #444 50%, 
-          #333 75%, 
-          #222 100%);
-      border-color: #999;
+          #999999 0%, 
+          #777777 25%, 
+          #555555 50%, 
+          #333333 75%, 
+          #222222 100%);
+      border-color: #aaaaaa;
       box-shadow: 
-        inset 0 2px 4px rgba(255, 255, 255, 0.15),
+        inset 0 2px 4px rgba(255, 255, 255, 0.18),
         inset 0 -2px 4px rgba(0, 0, 0, 0.4),
-        inset 2px 0 3px rgba(255, 255, 255, 0.08),
+        inset 2px 0 3px rgba(255, 255, 255, 0.1),
         inset -2px 0 3px rgba(0, 0, 0, 0.2),
-        0 4px 8px rgba(0, 0, 0, 0.3);
+        0 4px 8px rgba(0, 0, 0, 0.3),
+        0 0 8px rgba(170, 170, 170, 0.2);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
     .dj-hardware-switch.paused .switch-icon {
-      color: #ddd;
-      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
+      color: #eeeeee;
+      text-shadow: 
+        0 1px 2px rgba(0, 0, 0, 0.8),
+        0 0 4px rgba(170, 170, 170, 0.3);
+      transition: all 0.3s ease;
     }
 
     .dj-hardware-switch.recording {
       background: 
         linear-gradient(145deg, 
-          #ff3333 0%, 
-          #cc0000 25%, 
-          #990000 50%, 
-          #660000 75%, 
-          #330000 100%);
-      border-color: #ff4444;
+          #ff4444 0%, 
+          #dd2222 25%, 
+          #bb0000 50%, 
+          #880000 75%, 
+          #440000 100%);
+      border-color: #ff6666;
       animation: recording-pulse 1.5s ease-in-out infinite;
+      transition: background 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
     .dj-hardware-switch.recording .switch-icon {
-      color: #fff;
+      color: #ffffff;
       text-shadow: 
         0 1px 2px rgba(0, 0, 0, 0.8),
-        0 0 6px rgba(255, 0, 0, 0.5);
+        0 0 8px rgba(255, 68, 68, 0.8),
+        0 0 12px rgba(255, 255, 255, 0.3);
+      animation: recording-icon-pulse 1.5s ease-in-out infinite;
+      transition: all 0.3s ease;
     }
 
     .dj-hardware-switch.loading {
       background: 
         linear-gradient(145deg, 
-          #555 0%, 
-          #444 25%, 
-          #333 50%, 
-          #222 75%, 
-          #111 100%);
-      border-color: #666;
+          #666666 0%, 
+          #555555 25%, 
+          #444444 50%, 
+          #333333 75%, 
+          #222222 100%);
+      border-color: #777777;
+      box-shadow: 
+        inset 0 2px 4px rgba(255, 255, 255, 0.12),
+        inset 0 -2px 4px rgba(0, 0, 0, 0.4),
+        inset 2px 0 3px rgba(255, 255, 255, 0.08),
+        inset -2px 0 3px rgba(0, 0, 0, 0.2),
+        0 4px 8px rgba(0, 0, 0, 0.3);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
     .dj-hardware-switch.loading .switch-icon {
       animation: loading-spin 1s linear infinite;
-      color: #aaa;
+      color: #bbbbbb;
+      text-shadow: 
+        0 1px 2px rgba(0, 0, 0, 0.8),
+        0 0 4px rgba(187, 187, 187, 0.3);
+      transition: color 0.3s ease;
     }
 
+    /* Enhanced keyframe animations */
     @keyframes recording-pulse {
       0%, 100% { 
         box-shadow: 
-          inset 0 2px 4px rgba(255, 255, 255, 0.2),
+          inset 0 2px 4px rgba(255, 255, 255, 0.25),
           inset 0 -2px 4px rgba(0, 0, 0, 0.4),
-          inset 2px 0 3px rgba(255, 255, 255, 0.1),
+          inset 2px 0 3px rgba(255, 255, 255, 0.15),
           inset -2px 0 3px rgba(0, 0, 0, 0.2),
-          0 4px 8px rgba(255, 0, 0, 0.4),
-          0 0 12px rgba(255, 0, 0, 0.3);
+          0 4px 12px rgba(255, 68, 68, 0.5),
+          0 0 16px rgba(255, 68, 68, 0.4),
+          0 0 0 1px rgba(255, 102, 102, 0.6);
+        transform: scale(1);
       }
       50% { 
         box-shadow: 
-          inset 0 2px 4px rgba(255, 255, 255, 0.2),
+          inset 0 2px 4px rgba(255, 255, 255, 0.25),
           inset 0 -2px 4px rgba(0, 0, 0, 0.4),
-          inset 2px 0 3px rgba(255, 255, 255, 0.1),
+          inset 2px 0 3px rgba(255, 255, 255, 0.15),
           inset -2px 0 3px rgba(0, 0, 0, 0.2),
-          0 4px 16px rgba(255, 0, 0, 0.7),
-          0 0 20px rgba(255, 0, 0, 0.5);
+          0 4px 20px rgba(255, 68, 68, 0.8),
+          0 0 28px rgba(255, 68, 68, 0.7),
+          0 0 0 2px rgba(255, 102, 102, 0.8);
+        transform: scale(1.02);
+      }
+    }
+
+    @keyframes recording-icon-pulse {
+      0%, 100% { 
+        transform: scale(1);
+        text-shadow: 
+          0 1px 2px rgba(0, 0, 0, 0.8),
+          0 0 8px rgba(255, 68, 68, 0.8),
+          0 0 12px rgba(255, 255, 255, 0.3);
+      }
+      50% { 
+        transform: scale(1.1);
+        text-shadow: 
+          0 1px 2px rgba(0, 0, 0, 0.8),
+          0 0 12px rgba(255, 68, 68, 1),
+          0 0 16px rgba(255, 255, 255, 0.5);
       }
     }
 
     @keyframes loading-spin {
-      from { transform: rotate(0deg); }
-      to { transform: rotate(360deg); }
+      from { 
+        transform: rotate(0deg);
+      }
+      to { 
+        transform: rotate(360deg);
+      }
+    }
+
+    /* Smooth state transition animations */
+    .dj-hardware-switch {
+      transition: 
+        background 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+        border-color 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+        box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+        transform 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .switch-icon {
+      transition: 
+        color 0.3s ease,
+        text-shadow 0.3s ease,
+        transform 0.15s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
     /* Enhanced accessibility with hardware-style focus */
