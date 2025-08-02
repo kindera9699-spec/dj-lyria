@@ -1546,7 +1546,7 @@ describe('UnifiedDJControlBlock Visual State Indicators and Animations', () => {
   describe('Icon State Indicators', () => {
     it('should display correct icon for idle state', () => {
       const icon = element.shadowRoot?.querySelector('.switch-icon') as HTMLElement;
-      expect(icon.textContent).to.equal('▶️'); // Play icon
+      expect(icon.textContent).to.equal('▶'); // Play icon
     });
 
     it('should display correct icon for playing state', async () => {
@@ -1555,7 +1555,7 @@ describe('UnifiedDJControlBlock Visual State Indicators and Animations', () => {
       await element.updateComplete; // Wait for another update cycle
       
       const icon = element.shadowRoot?.querySelector('.switch-icon') as HTMLElement;
-      expect(icon.textContent).to.equal('⏸️'); // Pause icon
+      expect(icon.textContent).to.equal('⏸'); // Pause icon
     });
 
     it('should display correct icon for paused state', async () => {
@@ -1564,7 +1564,7 @@ describe('UnifiedDJControlBlock Visual State Indicators and Animations', () => {
       await element.updateComplete; // Wait for another update cycle
       
       const icon = element.shadowRoot?.querySelector('.switch-icon') as HTMLElement;
-      expect(icon.textContent).to.equal('▶️'); // Play icon
+      expect(icon.textContent).to.equal('▶'); // Play icon
     });
 
     it('should display correct icon for recording state', async () => {
@@ -1573,7 +1573,7 @@ describe('UnifiedDJControlBlock Visual State Indicators and Animations', () => {
       await element.updateComplete; // Wait for another update cycle
       
       const icon = element.shadowRoot?.querySelector('.switch-icon') as HTMLElement;
-      expect(icon.textContent).to.equal('⏺️'); // Record icon
+      expect(icon.textContent).to.equal('●'); // Record icon
     });
 
     it('should display correct icon for loading state', async () => {
@@ -1582,7 +1582,7 @@ describe('UnifiedDJControlBlock Visual State Indicators and Animations', () => {
       await element.updateComplete; // Wait for another update cycle
       
       const icon = element.shadowRoot?.querySelector('.switch-icon') as HTMLElement;
-      expect(icon.textContent).to.equal('⟳'); // Loading/refresh icon
+      expect(icon.textContent).to.equal('◐'); // Loading/refresh icon
     });
   });
 });

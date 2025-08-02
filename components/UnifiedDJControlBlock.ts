@@ -18,14 +18,7 @@ interface DJControlState {
   debounceTimer: number | null; // For debouncing state changes
 }
 
-/**
- * Event interfaces for DJ control events
- * These match the existing PlayPauseButton and RecordButton event patterns
- */
-interface DJControlEvents {
-  'play-pause-click': CustomEvent<void>;
-  'record-click': CustomEvent<void>;
-}
+
 
 /**
  * Valid state transitions for the DJ control
@@ -71,70 +64,122 @@ export class UnifiedDJControlBlock extends LitElement {
       justify-content: center;
       align-items: center;
       width: 100%;
-      height: 80px;
-      background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
-      border-bottom: 2px solid #444;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-      margin-bottom: 20px;
+      height: clamp(60px, 12vmin, 100px);
+      /* Transparent background - no square background */
+      background: transparent;
+      /* Responsive padding for different screen sizes */
+      padding: clamp(5px, 1.5vmin, 15px);
+      box-sizing: border-box;
     }
 
-    .dj-control-container {
-      position: relative;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      width: 120px;
-      height: 60px;
-      /* Hardware panel background */
-      background: 
-        linear-gradient(145deg, #3a3a3a 0%, #2a2a2a 50%, #1a1a1a 100%);
-      border-radius: 12px;
-      padding: 8px;
-      box-shadow: 
-        inset 0 1px 3px rgba(255, 255, 255, 0.1),
-        inset 0 -1px 3px rgba(0, 0, 0, 0.3),
-        0 2px 6px rgba(0, 0, 0, 0.2);
+    /* Responsive breakpoints for different screen sizes */
+    @media (max-width: 480px) {
+      :host {
+        height: 50px;
+        padding: 5px;
+      }
     }
+
+    @media (min-width: 481px) and (max-width: 768px) {
+      :host {
+        height: 65px;
+        padding: 8px;
+      }
+    }
+
+    @media (min-width: 769px) and (max-width: 1024px) {
+      :host {
+        height: 75px;
+        padding: 10px;
+      }
+    }
+
+    @media (min-width: 1025px) {
+      :host {
+        height: 85px;
+        padding: 12px;
+      }
+    }
+
+
 
     .dj-hardware-switch {
       position: relative;
-      width: 100px;
-      height: 50px;
-      /* Authentic DJ hardware metallic finish */
+      /* Perfect circle with responsive sizing */
+      width: clamp(50px, 12vmin, 80px);
+      height: clamp(50px, 12vmin, 80px);
+      border-radius: 50%;
+      /* Premium power button metallic finish */
       background: 
-        linear-gradient(145deg, 
-          #4a4a4a 0%, 
-          #3a3a3a 25%, 
-          #2a2a2a 50%, 
-          #1a1a1a 75%, 
+        radial-gradient(circle at 30% 30%, 
+          #5a5a5a 0%, 
+          #4a4a4a 20%, 
+          #3a3a3a 40%, 
+          #2a2a2a 60%, 
+          #1a1a1a 80%, 
           #0a0a0a 100%);
-      border: 2px solid #555;
-      border-radius: 6px;
+      border: clamp(2px, 0.5vmin, 4px) solid #666;
       cursor: pointer;
-      transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
-      /* Enhanced hardware-style shadows */
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      /* Enhanced circular power button shadows */
       box-shadow: 
-        /* Top highlight */
-        inset 0 2px 4px rgba(255, 255, 255, 0.15),
-        /* Bottom shadow */
-        inset 0 -2px 4px rgba(0, 0, 0, 0.4),
-        /* Left highlight */
-        inset 2px 0 3px rgba(255, 255, 255, 0.08),
-        /* Right shadow */
-        inset -2px 0 3px rgba(0, 0, 0, 0.2),
-        /* External shadow */
-        0 4px 8px rgba(0, 0, 0, 0.3),
-        /* Subtle outer glow */
-        0 0 0 1px rgba(255, 255, 255, 0.05);
+        /* Inner highlight ring */
+        inset 0 clamp(2px, 0.8vmin, 6px) clamp(4px, 1.2vmin, 8px) rgba(255, 255, 255, 0.2),
+        /* Inner shadow ring */
+        inset 0 clamp(-2px, -0.8vmin, -6px) clamp(4px, 1.2vmin, 8px) rgba(0, 0, 0, 0.5),
+        /* Outer shadow for depth */
+        0 clamp(3px, 1vmin, 8px) clamp(6px, 2vmin, 15px) rgba(0, 0, 0, 0.4),
+        /* Subtle outer rim glow */
+        0 0 0 clamp(1px, 0.3vmin, 2px) rgba(255, 255, 255, 0.1);
       user-select: none;
       display: flex;
       align-items: center;
       justify-content: center;
-      /* Hardware texture */
+      /* Subtle brushed metal texture */
       background-image: 
-        radial-gradient(circle at 20% 20%, rgba(255, 255, 255, 0.1) 1px, transparent 1px),
-        radial-gradient(circle at 80% 80%, rgba(0, 0, 0, 0.1) 1px, transparent 1px);
-      background-size: 8px 8px, 12px 12px;
+        conic-gradient(from 0deg, 
+          rgba(255, 255, 255, 0.1) 0deg,
+          transparent 45deg,
+          rgba(255, 255, 255, 0.05) 90deg,
+          transparent 135deg,
+          rgba(255, 255, 255, 0.1) 180deg,
+          transparent 225deg,
+          rgba(255, 255, 255, 0.05) 270deg,
+          transparent 315deg,
+          rgba(255, 255, 255, 0.1) 360deg);
+    }
+
+    /* Responsive breakpoints for power button */
+    @media (max-width: 480px) {
+      .dj-hardware-switch {
+        width: 45px;
+        height: 45px;
+        border-width: 2px;
+      }
+    }
+
+    @media (min-width: 481px) and (max-width: 768px) {
+      .dj-hardware-switch {
+        width: 55px;
+        height: 55px;
+        border-width: 2.5px;
+      }
+    }
+
+    @media (min-width: 769px) and (max-width: 1024px) {
+      .dj-hardware-switch {
+        width: 65px;
+        height: 65px;
+        border-width: 3px;
+      }
+    }
+
+    @media (min-width: 1025px) {
+      .dj-hardware-switch {
+        width: 75px;
+        height: 75px;
+        border-width: 3px;
+      }
     }
 
     .dj-hardware-switch:hover {
@@ -179,13 +224,47 @@ export class UnifiedDJControlBlock extends LitElement {
     }
 
     .switch-icon {
-      font-size: 20px;
+      /* Responsive font sizing for icons */
+      font-size: clamp(14px, 4vmin, 24px);
       color: #fff;
       transition: all 0.2s ease;
       text-shadow: 
         0 1px 2px rgba(0, 0, 0, 0.8),
         0 0 4px rgba(255, 255, 255, 0.1);
       filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.5));
+      /* Ensure icons remain crisp at all sizes */
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      /* Center the icon perfectly */
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      line-height: 1;
+    }
+
+    /* Responsive breakpoints for icon sizing */
+    @media (max-width: 480px) {
+      .switch-icon {
+        font-size: 12px;
+      }
+    }
+
+    @media (min-width: 481px) and (max-width: 768px) {
+      .switch-icon {
+        font-size: 16px;
+      }
+    }
+
+    @media (min-width: 769px) and (max-width: 1024px) {
+      .switch-icon {
+        font-size: 18px;
+      }
+    }
+
+    @media (min-width: 1025px) {
+      .switch-icon {
+        font-size: 20px;
+      }
     }
 
     /* Enhanced state-specific styling with distinct visual indicators */
@@ -401,22 +480,105 @@ export class UnifiedDJControlBlock extends LitElement {
     .dj-hardware-switch:focus {
       outline: none;
       box-shadow: 
-        inset 0 2px 4px rgba(255, 255, 255, 0.15),
-        inset 0 -2px 4px rgba(0, 0, 0, 0.4),
-        inset 2px 0 3px rgba(255, 255, 255, 0.08),
-        inset -2px 0 3px rgba(0, 0, 0, 0.2),
-        0 4px 8px rgba(0, 0, 0, 0.3),
-        0 0 0 2px #0088ff,
-        0 0 8px rgba(0, 136, 255, 0.4);
+        inset 0 clamp(1px, 0.4vmin, 3px) clamp(2px, 0.8vmin, 5px) rgba(255, 255, 255, 0.15),
+        inset 0 clamp(-1px, -0.4vmin, -3px) clamp(2px, 0.8vmin, 5px) rgba(0, 0, 0, 0.4),
+        inset clamp(1px, 0.4vmin, 3px) 0 clamp(1px, 0.6vmin, 4px) rgba(255, 255, 255, 0.08),
+        inset clamp(-1px, -0.4vmin, -3px) 0 clamp(1px, 0.6vmin, 4px) rgba(0, 0, 0, 0.2),
+        0 clamp(2px, 0.8vmin, 5px) clamp(4px, 1.5vmin, 10px) rgba(0, 0, 0, 0.3),
+        0 0 0 clamp(2px, 0.5vmin, 3px) #0088ff,
+        0 0 clamp(4px, 1.5vmin, 12px) rgba(0, 136, 255, 0.4);
+      /* Enhanced focus ring for better visibility */
+      position: relative;
     }
 
     .dj-hardware-switch:focus:not(:focus-visible) {
       box-shadow: 
-        inset 0 2px 4px rgba(255, 255, 255, 0.15),
-        inset 0 -2px 4px rgba(0, 0, 0, 0.4),
-        inset 2px 0 3px rgba(255, 255, 255, 0.08),
-        inset -2px 0 3px rgba(0, 0, 0, 0.2),
-        0 4px 8px rgba(0, 0, 0, 0.3);
+        inset 0 clamp(1px, 0.4vmin, 3px) clamp(2px, 0.8vmin, 5px) rgba(255, 255, 255, 0.15),
+        inset 0 clamp(-1px, -0.4vmin, -3px) clamp(2px, 0.8vmin, 5px) rgba(0, 0, 0, 0.4),
+        inset clamp(1px, 0.4vmin, 3px) 0 clamp(1px, 0.6vmin, 4px) rgba(255, 255, 255, 0.08),
+        inset clamp(-1px, -0.4vmin, -3px) 0 clamp(1px, 0.6vmin, 4px) rgba(0, 0, 0, 0.2),
+        0 clamp(2px, 0.8vmin, 5px) clamp(4px, 1.5vmin, 10px) rgba(0, 0, 0, 0.3);
+    }
+
+    /* High contrast mode support */
+    @media (prefers-contrast: high) {
+      .dj-hardware-switch {
+        border-width: clamp(2px, 0.5vmin, 4px);
+        border-color: #ffffff;
+      }
+      
+      .dj-hardware-switch:focus {
+        box-shadow: 
+          0 0 0 clamp(3px, 0.8vmin, 5px) #ffffff,
+          0 0 clamp(6px, 2vmin, 15px) rgba(255, 255, 255, 0.8);
+      }
+      
+      .switch-icon {
+        color: #ffffff;
+        text-shadow: 
+          0 0 clamp(2px, 0.5vmin, 4px) #000000,
+          0 0 clamp(4px, 1vmin, 8px) #000000;
+      }
+    }
+
+    /* Reduced motion support */
+    @media (prefers-reduced-motion: reduce) {
+      .dj-hardware-switch,
+      .switch-icon {
+        transition: none;
+        animation: none;
+      }
+      
+      .dj-hardware-switch.recording {
+        animation: none;
+        box-shadow: 
+          inset 0 2px 4px rgba(255, 255, 255, 0.25),
+          inset 0 -2px 4px rgba(0, 0, 0, 0.4),
+          inset 2px 0 3px rgba(255, 255, 255, 0.15),
+          inset -2px 0 3px rgba(0, 0, 0, 0.2),
+          0 4px 12px rgba(255, 68, 68, 0.5),
+          0 0 16px rgba(255, 68, 68, 0.4),
+          0 0 0 2px rgba(255, 102, 102, 0.8);
+      }
+      
+      .dj-hardware-switch.recording .switch-icon {
+        animation: none;
+      }
+      
+      .dj-hardware-switch.loading .switch-icon {
+        animation: none;
+      }
+    }
+
+    /* Touch device optimizations */
+    @media (hover: none) and (pointer: coarse) {
+      .dj-hardware-switch {
+        /* Larger touch targets for mobile */
+        min-width: 44px;
+        min-height: 44px;
+        /* Enhanced touch feedback */
+        -webkit-tap-highlight-color: rgba(0, 136, 255, 0.3);
+      }
+      
+      .dj-hardware-switch:hover {
+        /* Remove hover effects on touch devices */
+        background: 
+          linear-gradient(145deg, 
+            #4a4a4a 0%, 
+            #3a3a3a 25%, 
+            #2a2a2a 50%, 
+            #1a1a1a 75%, 
+            #0a0a0a 100%);
+        border-color: #555;
+        transform: none;
+      }
+    }
+
+    /* Print styles */
+    @media print {
+      :host {
+        display: none;
+      }
     }
   `;
 
@@ -480,31 +642,7 @@ export class UnifiedDJControlBlock extends LitElement {
     return validTransitions ? validTransitions.includes(toState) : false;
   }
 
-  /**
-   * Safely transition to a new state with validation
-   */
-  private transitionToState(newMode: DJControlState['mode']) {
-    const currentMode = this.controlState.mode;
-    
-    // Validate the transition
-    if (!this.isValidTransition(currentMode, newMode)) {
-      console.warn(`Invalid state transition from ${currentMode} to ${newMode}`);
-      return false;
-    }
 
-    // Store previous mode when entering recording state
-    const previousMode = newMode === 'recording' ? currentMode : this.controlState.previousMode;
-
-    // Update state
-    this.controlState = {
-      ...this.controlState,
-      mode: newMode,
-      previousMode: previousMode as 'idle' | 'playing' | 'paused' | undefined,
-    };
-
-    this.requestUpdate();
-    return true;
-  }
 
   /**
    * Update control state based on external props (bypasses validation for prop-driven changes)
@@ -553,16 +691,16 @@ export class UnifiedDJControlBlock extends LitElement {
   private renderIcon() {
     switch (this.controlState.mode) {
       case 'playing':
-        return '⏸️'; // Pause icon
+        return '⏸'; // Clean pause symbol
       case 'paused':
       case 'idle':
-        return '▶️'; // Play icon
+        return '▶'; // Clean play symbol
       case 'recording':
-        return '⏺️'; // Record icon
+        return '●'; // Clean record dot
       case 'loading':
-        return '⟳'; // Loading/refresh icon
+        return '◐'; // Clean loading symbol
       default:
-        return '▶️';
+        return '▶';
     }
   }
 
@@ -682,23 +820,21 @@ export class UnifiedDJControlBlock extends LitElement {
     };
 
     return html`
-      <div class="dj-control-container">
-        <div 
-          class=${Object.entries(switchClasses)
-            .filter(([, value]) => value)
-            .map(([key]) => key)
-            .join(' ')}
-          tabindex="0"
-          role="button"
-          aria-label="DJ Control Switch - ${this.controlState.mode}"
-          @click=${this.handleClick}
-          @mousedown=${this.handleMouseDown}
-          @mouseup=${this.handleMouseUp}
-          @mouseleave=${this.handleMouseUp}
-          @keydown=${this.handleKeyDown}
-        >
-          <span class="switch-icon">${this.renderIcon()}</span>
-        </div>
+      <div 
+        class=${Object.entries(switchClasses)
+          .filter(([, value]) => value)
+          .map(([key]) => key)
+          .join(' ')}
+        tabindex="0"
+        role="button"
+        aria-label="DJ Control Switch - ${this.controlState.mode}"
+        @click=${this.handleClick}
+        @mousedown=${this.handleMouseDown}
+        @mouseup=${this.handleMouseUp}
+        @mouseleave=${this.handleMouseUp}
+        @keydown=${this.handleKeyDown}
+      >
+        <span class="switch-icon">${this.renderIcon()}</span>
       </div>
     `;
   }
