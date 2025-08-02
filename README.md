@@ -20,7 +20,7 @@
 
 1. [fork the repo](https://github.com/daoch4n/dj-lyria/fork)
 2. in your fork, go to `⚙️ Settings` > `Pages` and set `Build and deployment` > `Source` to `Github Actions`
-3. update readme to trigger new action run or find initial run that failed due to `Pages` not enabled and click `Rerun all jobs`
+3. update readme to trigger new action run
 4. GitHub Action will handle the build and deploy
    - 🚀 check it out at yourusername.github.io/dj-lyria
 
