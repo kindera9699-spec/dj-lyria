@@ -1,35 +1,62 @@
 import { LitElement, type PropertyValues, css, html } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 
+interface OverloadColorStop {
+  threshold: number;
+  color: { r: number; g: number; b: number };
+  name: string;
+}
+
 @customElement('dsp-overload-indicator')
 export class DSPOverloadIndicator extends LitElement {
   @property({ type: Number }) currentPromptAverage = 0;
   @property({ type: Number }) currentKnobAverageExtremeness = 0;
   @state() private _visible = false;
-  @state() private _rgbCycleSpeed = 1.0;
-  @state() private _blinkDuration = 1.0; // New state for blink animation duration
-  @state() private _rgbColor = 'rgb(255, 0, 0)'; // Initial color
+  @state() private _overloadLevel = 0;
+  @state() private _currentColor = 'rgb(0, 255, 0)';
+  @state() private _glowIntensity = 0;
+  @state() private _isOverloadState = false;
+  @state() private _blinkSpeed = 1;
 
-  private _rgbCycleAnimationId: number | null = null;
-  private _rgbCycleStartTime: number | null = null;
+  private _blinkAnimationId: number | null = null;
+  private _overloadResetTimer: number | null = null;
+
+  // Progressive color stops: Green → Yellow → Red → Purple → Blue → OVERLOAD
+  private readonly colorStops: OverloadColorStop[] = [
+    { threshold: 0.0, color: { r: 0, g: 255, b: 0 }, name: 'Safe' },      // Green
+    { threshold: 0.3, color: { r: 255, g: 255, b: 0 }, name: 'Caution' }, // Yellow  
+    { threshold: 0.6, color: { r: 255, g: 0, b: 0 }, name: 'Warning' },   // Red
+    { threshold: 0.8, color: { r: 128, g: 0, b: 128 }, name: 'Critical' }, // Purple
+    { threshold: 1.0, color: { r: 0, g: 0, b: 255 }, name: 'Extreme' },   // Blue
+    { threshold: 1.2, color: { r: 255, g: 0, b: 0 }, name: 'OVERLOAD' },  // Red (Easter egg)
+  ];
 
   static styles = css`
     :host {
-      position: fixed;
-      top: 10px;
-      right: 10px;
-      z-index: 9999;
+      position: relative;
       background: rgba(0, 0, 0, 0.6);
-      padding: 8px 12px;
+      padding: 0 12px;
       border-radius: 5px;
-      border: 1px solid #555;
+      border: 1px solid var(--border-color, #555);
       color: white;
-      display: none; /* Hidden by default */
+      width: 100%;
+      box-sizing: border-box;
+      overflow: hidden;
+      opacity: 0;
+      max-height: 0;
+      margin-bottom: 0;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: var(--glow-shadow, none);
     }
 
     :host(.is-visible) {
-      display: block;
-      box-shadow: 0 0 5px var(--rgb-color), 0 0 10px var(--rgb-color);
+      opacity: 1;
+      max-height: 100px;
+      padding: 16px 12px;
+      margin-bottom: 15px;
     }
   `;
 
@@ -40,135 +67,196 @@ export class DSPOverloadIndicator extends LitElement {
       changedProperties.has('currentPromptAverage') ||
       changedProperties.has('currentKnobAverageExtremeness')
     ) {
-      const promptAvg = this.currentPromptAverage;
-      const knobExt = this.currentKnobAverageExtremeness;
+      this.updateOverloadState();
+    }
+  }
 
-      // Calculate a combined overload factor
-      const overloadFactor = Math.max(promptAvg, knobExt) * 2;
+  private updateOverloadState() {
+    const promptAvg = this.currentPromptAverage;
+    const knobExt = this.currentKnobAverageExtremeness;
 
-      // Determine visibility based on the combined overload factor
-      const shouldBeVisible = overloadFactor > 0.5;
+    // Calculate combined overload factor (0 to 1.5+ range for easter egg)
+    const overloadFactor = Math.max(promptAvg, knobExt) * 2;
 
-      if (shouldBeVisible && !this._visible) {
-        // Transition from hidden to visible
-        this._visible = true;
+    // Allow overload level to exceed 1.0 for OVERLOAD state
+    this._overloadLevel = Math.max(0, overloadFactor - 0.2);
+
+    // Determine visibility - show when overload > 0.2 (20%)
+    const shouldBeVisible = overloadFactor > 0.2;
+
+    // Check for OVERLOAD easter egg state (threshold 1.2)
+    const isOverloadState = this._overloadLevel >= 1.2;
+
+    if (shouldBeVisible !== this._visible) {
+      this._visible = shouldBeVisible;
+      if (shouldBeVisible) {
         this.classList.add('is-visible');
-        this._startRgbCycle();
-      } else if (!shouldBeVisible && this._visible) {
-        // Transition from visible to hidden
-        this._visible = false;
+      } else {
         this.classList.remove('is-visible');
-        this._stopRgbCycle();
-        // Reset color when not visible
-        this._rgbColor = 'rgb(255, 0, 0)';
-      }
-
-      if (this._visible) {
-        // Calculate speed: faster as overloadFactor increases from 0.5 to 2.0
-        // Min speed (fastest) at overloadFactor = 2.0 (0.2s)
-        // Max speed (slowest) at overloadFactor = 0.5 (1.0s)
-        const minOverload = 0.5;
-        const maxOverload = 2.0;
-        const minSpeed = 0.2; // Fastest cycle
-        const maxSpeed = 1.0; // Slowest cycle
-
-        // Normalize overloadFactor from [0.5, 2.0] to [0, 1]
-        const normalizedOverload = Math.min(
-          1,
-          Math.max(
-            0,
-            (overloadFactor - minOverload) / (maxOverload - minOverload),
-          ),
-        );
-
-        // Interpolate speed: higher normalizedOverload means faster speed (smaller value)
-        this._rgbCycleSpeed =
-          maxSpeed - normalizedOverload * (maxSpeed - minSpeed);
-        this._blinkDuration = this._rgbCycleSpeed; // Blink duration matches color cycle speed
-
-        // Set CSS variables for animation durations
-        this.style.setProperty('--rgb-cycle-speed', `${this._rgbCycleSpeed}s`);
-        this.style.setProperty('--blink-duration', `${this._blinkDuration}s`);
+        this._stopBlinking();
       }
     }
+
+    // Handle OVERLOAD state transition
+    if (isOverloadState !== this._isOverloadState) {
+      this._isOverloadState = isOverloadState;
+      if (isOverloadState) {
+        this._startOverloadSequence();
+      } else {
+        this._stopOverloadSequence();
+      }
+    }
+
+    if (this._visible) {
+      this.updateColorAndGlow();
+    }
+  }
+
+  private updateColorAndGlow() {
+    const { color, intensity } = this.calculateColorAndIntensity(this._overloadLevel);
+
+    this._currentColor = `rgb(${color.r}, ${color.g}, ${color.b})`;
+    this._glowIntensity = intensity;
+
+    // Update CSS variables for dynamic styling
+    this.style.setProperty('--border-color', this._currentColor);
+
+    // Create progressive glow effect with increasing intensity
+    const baseGlow = 4 + (intensity * 12); // 4px to 16px
+    const outerGlow = 8 + (intensity * 24); // 8px to 32px
+    const glowShadow = `0 0 ${baseGlow}px ${this._currentColor}, 0 0 ${outerGlow}px ${this._currentColor}`;
+
+    this.style.setProperty('--glow-shadow', glowShadow);
+  }
+
+  private calculateColorAndIntensity(level: number): { color: { r: number; g: number; b: number }, intensity: number } {
+    // Find the two color stops to interpolate between
+    let lowerStop = this.colorStops[0];
+    let upperStop = this.colorStops[this.colorStops.length - 1];
+
+    for (let i = 0; i < this.colorStops.length - 1; i++) {
+      if (level >= this.colorStops[i].threshold && level <= this.colorStops[i + 1].threshold) {
+        lowerStop = this.colorStops[i];
+        upperStop = this.colorStops[i + 1];
+        break;
+      }
+    }
+
+    // Calculate interpolation factor
+    const range = upperStop.threshold - lowerStop.threshold;
+    const factor = range === 0 ? 0 : (level - lowerStop.threshold) / range;
+
+    // Interpolate between colors
+    const color = {
+      r: Math.round(lowerStop.color.r + (upperStop.color.r - lowerStop.color.r) * factor),
+      g: Math.round(lowerStop.color.g + (upperStop.color.g - lowerStop.color.g) * factor),
+      b: Math.round(lowerStop.color.b + (upperStop.color.b - lowerStop.color.b) * factor),
+    };
+
+    // Calculate glow intensity (0 to 1)
+    const intensity = Math.pow(level, 1.5); // Exponential curve for more dramatic effect
+
+    return { color, intensity };
+  }
+
+  private getCurrentOverloadStatus(): string {
+    const level = this._overloadLevel;
+
+    for (let i = this.colorStops.length - 1; i >= 0; i--) {
+      if (level >= this.colorStops[i].threshold) {
+        return this.colorStops[i].name;
+      }
+    }
+
+    return this.colorStops[0].name;
+  }
+
+  private _startOverloadSequence() {
+    // Start with slow blinking, then accelerate
+    this._blinkSpeed = 1;
+    this._startBlinking();
+
+    // Set timer to trigger reset after 3 seconds of OVERLOAD state
+    this._overloadResetTimer = window.setTimeout(() => {
+      this._triggerReset();
+    }, 3000);
+  }
+
+  private _stopOverloadSequence() {
+    this._stopBlinking();
+    if (this._overloadResetTimer) {
+      clearTimeout(this._overloadResetTimer);
+      this._overloadResetTimer = null;
+    }
+  }
+
+  private _startBlinking() {
+    if (this._blinkAnimationId !== null) return;
+
+    let blinkCount = 0;
+    const maxBlinks = 30; // Total blinks before reset
+
+    const blink = () => {
+      if (!this._isOverloadState) {
+        this._stopBlinking();
+        return;
+      }
+
+      // Accelerate blinking: start at 500ms, end at 50ms
+      const progress = blinkCount / maxBlinks;
+      const blinkInterval = 500 - (progress * 450); // 500ms -> 50ms
+
+      // Toggle visibility for blink effect
+      const isVisible = blinkCount % 2 === 0;
+      this.style.opacity = isVisible ? '1' : '0.3';
+
+      blinkCount++;
+
+      if (blinkCount < maxBlinks) {
+        this._blinkAnimationId = window.setTimeout(blink, blinkInterval);
+      } else {
+        // Max blinks reached, trigger reset
+        this._triggerReset();
+      }
+    };
+
+    blink();
+  }
+
+  private _stopBlinking() {
+    if (this._blinkAnimationId !== null) {
+      clearTimeout(this._blinkAnimationId);
+      this._blinkAnimationId = null;
+    }
+    // Restore normal opacity
+    this.style.opacity = '';
+  }
+
+  private _triggerReset() {
+    // Dispatch custom event to trigger the main app's resetAll method
+    this.dispatchEvent(new CustomEvent('dsp-overload-reset', {
+      bubbles: true,
+      composed: true,
+      detail: { message: 'DSP Overload triggered system reset!' }
+    }));
+
+    // Clean up overload state
+    this._stopOverloadSequence();
+    this._isOverloadState = false;
   }
 
   override connectedCallback() {
     super.connectedCallback();
-    // Ensure animation stops if component is removed from DOM
-    this._stopRgbCycle();
   }
 
   override disconnectedCallback() {
     super.disconnectedCallback();
-    this._stopRgbCycle();
-  }
-
-  private _startRgbCycle() {
-    if (this._rgbCycleAnimationId === null) {
-      this._rgbCycleStartTime = performance.now();
-      this._rgbCycleAnimationId = requestAnimationFrame(
-        this._animateRgbCycle.bind(this),
-      );
-    }
-  }
-
-  private _stopRgbCycle() {
-    if (this._rgbCycleAnimationId !== null) {
-      cancelAnimationFrame(this._rgbCycleAnimationId);
-      this._rgbCycleAnimationId = null;
-      this._rgbCycleStartTime = null;
-    }
-  }
-
-  private _animateRgbCycle(currentTime: DOMHighResTimeStamp) {
-    if (this._rgbCycleStartTime === null) {
-      this._rgbCycleStartTime = currentTime;
-    }
-
-    const elapsed = currentTime - this._rgbCycleStartTime;
-    // The cycle speed is in seconds, read from CSS variable
-    const rgbCycleSpeedSeconds = Number.parseFloat(
-      getComputedStyle(this).getPropertyValue('--rgb-cycle-speed'),
-    );
-    const cycleDurationMs = rgbCycleSpeedSeconds * 1000;
-    const progress = (elapsed % cycleDurationMs) / cycleDurationMs; // Normalized progress [0, 1)
-
-    // RGB cycle: Red -> Green -> Blue -> Red
-    let r;
-    let g;
-    let b;
-
-    if (progress < 1 / 3) {
-      // Red to Green (0 to 1/3)
-      const p = progress * 3; // Normalized to [0, 1)
-      r = 255 * (1 - p);
-      g = 255 * p;
-      b = 0;
-    } else if (progress < 2 / 3) {
-      // Green to Blue (1/3 to 2/3)
-      const p = (progress - 1 / 3) * 3; // Normalized to [0, 1)
-      r = 0;
-      g = 255 * (1 - p);
-      b = 255 * p;
-    } else {
-      // Blue to Red (2/3 to 1)
-      const p = (progress - 2 / 3) * 3; // Normalized to [0, 1)
-      r = 255 * p;
-      g = 0;
-      b = 255 * (1 - p);
-    }
-
-    this._rgbColor = `rgb(${Math.round(r)}, ${Math.round(g)}, ${Math.round(b)})`;
-    this.style.setProperty('--rgb-color', this._rgbColor); // Update CSS variable
-
-    this._rgbCycleAnimationId = requestAnimationFrame(
-      this._animateRgbCycle.bind(this),
-    );
+    this._stopOverloadSequence();
   }
 
   render() {
-    return html`DSP Overload`;
+    const status = this.getCurrentOverloadStatus();
+    return html`DSP ${status}`;
   }
 }
 

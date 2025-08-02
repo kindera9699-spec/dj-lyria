@@ -382,26 +382,7 @@ export class PromptDjMidi extends LitElement {
       display: inline-block; /* Allow padding and alignment */
       text-align: center;
     }
-    #buttons dsp-overload-indicator {
-      /* Copied from #buttons button and adjusted */
-      font-weight: 600;
-      cursor: default; /* It's an indicator, not a button */
-      color: #fff;
-      background: rgba(0, 0, 0, 0.4); /* Standardized black alpha */
-      -webkit-font-smoothing: antialiased;
-      border: 1.5px solid #fff;
-      border-radius: 4px;
-      user-select: none;
-      padding: 3px 6px;
-      display: none; /* Original logic for appearing/disappearing */
-      vertical-align: middle;
-      height: auto;
-      box-sizing: border-box;
-    }
-    /* Override display:none when it should be visible */
-    #buttons dsp-overload-indicator.is-visible {
-      display: inline-block;
-    }
+
     #buttons .flow-parameters-group {
       display: flex;
       align-items: center;
@@ -2459,6 +2440,17 @@ export class PromptDjMidi extends LitElement {
     // isRecordingActive state is updated within startRecording/stopRecording's onstop
     // and because it's a @state property, Lit should handle re-rendering the record-button.
   }
+
+  private handleDspOverloadReset(event: CustomEvent) {
+    console.log('🚨 DSP OVERLOAD DETECTED! Triggering system reset...', event.detail);
+    
+    // Add a small delay for dramatic effect
+    setTimeout(() => {
+      this.resetAll();
+      console.log('✅ System reset completed due to DSP overload');
+    }, 100);
+  }
+
   private resetAll() {
     this.config = { ...PromptDjMidi.INITIAL_CONFIG };
 
@@ -2821,12 +2813,6 @@ export class PromptDjMidi extends LitElement {
     return html`
         <div id="background" style=${bg}></div>
         <div id="buttons">
-          <dsp-overload-indicator
-            .currentPromptAverage=${this.promptWeightedAverage}
-            .currentKnobAverageExtremeness=${this.knobAverageExtremeness}
-            .indicatorColor=${this.dspOverloadIndicatorColor}
-            .blinkDuration=${this.dspOverloadBlinkDuration}
-          ></dsp-overload-indicator>
           <!-- MIDI Controls -->
           <button
             @click=${this.toggleShowMidi}
@@ -3027,6 +3013,13 @@ export class PromptDjMidi extends LitElement {
 ${this.renderPrompts()}
         </div>
 <div class=${advancedClasses}>
+          <dsp-overload-indicator
+            .currentPromptAverage=${this.promptWeightedAverage}
+            .currentKnobAverageExtremeness=${this.knobAverageExtremeness}
+            .indicatorColor=${this.dspOverloadIndicatorColor}
+            .blinkDuration=${this.dspOverloadBlinkDuration}
+            @dsp-overload-reset=${this.handleDspOverloadReset}
+          ></dsp-overload-indicator>
           <unified-dj-control-block
             .playbackState=${this.playbackState}
             .isRecording=${this.isRecordingActive}
