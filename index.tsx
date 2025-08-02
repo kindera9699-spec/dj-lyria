@@ -31,8 +31,7 @@ import './components/PromptController';
 import type { WeightKnob } from './components/WeightKnob';
 import './components/DJStyleSelector';
 import type { DJStyleSelectorOption } from './components/DJStyleSelector';
-import './components/PlayPauseButton';
-import './components/RecordButton.js'; // Import RecordButton
+import './components/UnifiedDJControlBlock';
 import './components/DSPOverloadIndicator.js';
 
 import type { PlaybackState, Prompt } from './types';
@@ -208,8 +207,8 @@ export class PromptDjMidi extends LitElement {
       flex-shrink: 0;
       display: flex;
       flex-direction: column;
-      padding: 20px;
-      padding-top: 20px;
+      padding: 0 20px 20px 20px;
+      padding-top: 0;
       box-sizing: border-box;
     }
     .advanced-settings-panel .setting {
@@ -461,17 +460,7 @@ export class PromptDjMidi extends LitElement {
       color: #000;
     }
 
-    .playback-record-controls {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      gap: 20px;
-    }
-    play-pause-button, record-button {
-      width: 70px;
-      height: 70px;
-      cursor: pointer;
-    }
+
    .solo-group-header {
      font-weight: bold;
      margin-top: 15px; 
@@ -3038,16 +3027,12 @@ export class PromptDjMidi extends LitElement {
 ${this.renderPrompts()}
         </div>
 <div class=${advancedClasses}>
-          <div class="playback-record-controls">
-            <play-pause-button
-              .playbackState=${this.playbackState}
-              @play-pause-click=${this.handleMainAudioButton}
-            ></play-pause-button>
-            <record-button
-              .isRecording=${this.isRecordingActive}
-              @record-click=${this.handleRecordClick}
-            ></record-button>
-          </div>
+          <unified-dj-control-block
+            .playbackState=${this.playbackState}
+            .isRecording=${this.isRecordingActive}
+            @play-pause-click=${this.handleMainAudioButton}
+            @record-click=${this.handleRecordClick}
+          ></unified-dj-control-block>
           <div class="setting">
             <label for="density">Density: <span class="label-value">${(this.config.density ?? 0.5).toFixed(2)}</span></label>
             <weight-knob
