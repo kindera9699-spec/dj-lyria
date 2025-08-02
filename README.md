@@ -1,10 +1,10 @@
 # 🎧 [DJ](https://daoch4n.github.io/dj-lyria/) [Lyria](https://deepmind.google/models/lyria/realtime) [MIDI](https://en.wikipedia.org/wiki/MIDI) AI synth 🎛️
 
-- 🎛️ 32 reassignable knobs ( 🖱️ mouse | 🫵🏻 touch | 🎛️ MIDI )
+- 🎛️ vibe knobs ( 🖱️ mouse | 🫵🏻 touch | 🎛️ MIDI )
 - 💾 save | load presets
 - ✨ auto ( ⚖️ randomizer )
-- 🪩 flow ( 🌱 randomizer )
-- ⚙️ control sidebar:
+- 🎐 flow ( 🌱 randomizer )
+- ⚙️ sidebar:
   - `BPM`
   - `Density`
   - `Brightness`
@@ -13,7 +13,8 @@
   - `Top K`
   - `Guidance`
   - `Bass / Drums Solo`
-- ⏺️ inbrowser [OGG](https://en.wikipedia.org/wiki/Vorbis) encoder with wasm polyfill for safari ( see [#67](https://github.com/daoch4n/dj-lyria/issues/67) )
+- ⏺️ rec ( 🎙️ [ogg](https://en.wikipedia.org/wiki/Vorbis) encoder with wasm polyfill for safari ( alpha feat | see [#67](https://github.com/daoch4n/dj-lyria/issues/67) ) ):
+  - hold the power button to start recording | tap again to stop
 
 ### cloud:
 
