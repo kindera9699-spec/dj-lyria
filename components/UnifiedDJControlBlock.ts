@@ -350,11 +350,17 @@ export class UnifiedDJControlBlock extends LitElement {
    * Clean up any pending timers and reset state
    */
   private cleanupState() {
-    if (this.controlState.holdTimer) {
-      clearTimeout(this.controlState.holdTimer);
-      this.controlState.holdTimer = null;
-    }
+    this.clearHoldTimer();
+    // Reset to idle state on cleanup
+    this.controlState = {
+      ...this.controlState,
+      mode: 'idle',
+      isPressed: false,
+      previousMode: undefined,
+    };
   }
+
+
 
   /**
    * Validate if a state transition is allowed
@@ -391,7 +397,7 @@ export class UnifiedDJControlBlock extends LitElement {
   }
 
   /**
-   * Update control state based on external props with validation
+   * Update control state based on external props (bypasses validation for prop-driven changes)
    */
   private updateControlState() {
     let targetMode: DJControlState['mode'];
@@ -417,9 +423,20 @@ export class UnifiedDJControlBlock extends LitElement {
       }
     }
 
-    // Only transition if the mode actually changed
+    // Only update if the mode actually changed
     if (targetMode !== this.controlState.mode) {
-      this.transitionToState(targetMode);
+      // Store previous mode when entering recording state
+      const previousMode = targetMode === 'recording' ? this.controlState.mode : this.controlState.previousMode;
+
+      // Update state directly for prop-driven changes (no validation needed)
+      const newState = {
+        ...this.controlState,
+        mode: targetMode,
+        previousMode: previousMode as 'idle' | 'playing' | 'paused' | undefined,
+      };
+      
+      this.controlState = newState;
+      this.requestUpdate();
     }
   }
 
@@ -445,20 +462,30 @@ export class UnifiedDJControlBlock extends LitElement {
       return;
     }
 
-    // Handle recording state
+    // Handle recording state - return to previous state
     if (this.controlState.mode === 'recording') {
       this.dispatchEvent(new CustomEvent('dj-control-record-stop'));
+      
+      // Transition back to previous state if available, otherwise idle
+      const returnMode = this.controlState.previousMode || 'idle';
+      if (this.isValidTransition('recording', returnMode)) {
+        this.transitionToState(returnMode);
+      }
       return;
     }
 
-    // Handle play/pause states
+    // Handle play/pause states with proper state transitions
     switch (this.controlState.mode) {
       case 'idle':
       case 'paused':
-        this.dispatchEvent(new CustomEvent('dj-control-play'));
+        if (this.isValidTransition(this.controlState.mode, 'playing')) {
+          this.dispatchEvent(new CustomEvent('dj-control-play'));
+        }
         break;
       case 'playing':
-        this.dispatchEvent(new CustomEvent('dj-control-pause'));
+        if (this.isValidTransition(this.controlState.mode, 'paused')) {
+          this.dispatchEvent(new CustomEvent('dj-control-pause'));
+        }
         break;
     }
   }
@@ -469,7 +496,11 @@ export class UnifiedDJControlBlock extends LitElement {
     // Set up hold timer for record functionality
     this.controlState.holdTimer = window.setTimeout(() => {
       if (this.controlState.mode !== 'recording' && this.controlState.mode !== 'loading') {
-        this.dispatchEvent(new CustomEvent('dj-control-record-start'));
+        // Validate transition to recording state
+        if (this.isValidTransition(this.controlState.mode, 'recording')) {
+          this.dispatchEvent(new CustomEvent('dj-control-record-start'));
+          // The actual state transition will happen when isRecording prop updates
+        }
       }
     }, 500); // 500ms hold time
 
@@ -479,13 +510,19 @@ export class UnifiedDJControlBlock extends LitElement {
   private handleMouseUp() {
     this.controlState = { ...this.controlState, isPressed: false };
     
-    // Clear hold timer
+    // Clear hold timer using cleanup method
+    this.clearHoldTimer();
+    this.requestUpdate();
+  }
+
+  /**
+   * Clear the hold timer safely
+   */
+  private clearHoldTimer() {
     if (this.controlState.holdTimer) {
       clearTimeout(this.controlState.holdTimer);
       this.controlState.holdTimer = null;
     }
-
-    this.requestUpdate();
   }
 
   private handleKeyDown(e: KeyboardEvent) {
