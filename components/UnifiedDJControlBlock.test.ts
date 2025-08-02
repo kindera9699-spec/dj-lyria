@@ -1545,8 +1545,11 @@ describe('UnifiedDJControlBlock Visual State Indicators and Animations', () => {
 
   describe('Icon State Indicators', () => {
     it('should display correct icon for idle state', () => {
-      const icon = element.shadowRoot?.querySelector('.switch-icon') as HTMLElement;
-      expect(icon.textContent).to.equal('▶'); // Play icon
+      const svg = element.shadowRoot?.querySelector('.switch-icon svg') as SVGElement;
+      expect(svg).to.exist;
+      // Check for play icon (triangle path)
+      const path = svg.querySelector('path[d="M8 5v14l11-7z"]');
+      expect(path).to.exist;
     });
 
     it('should display correct icon for playing state', async () => {
@@ -1554,8 +1557,11 @@ describe('UnifiedDJControlBlock Visual State Indicators and Animations', () => {
       await element.updateComplete;
       await element.updateComplete; // Wait for another update cycle
       
-      const icon = element.shadowRoot?.querySelector('.switch-icon') as HTMLElement;
-      expect(icon.textContent).to.equal('⏸'); // Pause icon
+      const svg = element.shadowRoot?.querySelector('.switch-icon svg') as SVGElement;
+      expect(svg).to.exist;
+      // Check for pause icon (two rectangles)
+      const rects = svg.querySelectorAll('rect');
+      expect(rects.length).to.equal(2);
     });
 
     it('should display correct icon for paused state', async () => {
@@ -1563,8 +1569,11 @@ describe('UnifiedDJControlBlock Visual State Indicators and Animations', () => {
       await element.updateComplete;
       await element.updateComplete; // Wait for another update cycle
       
-      const icon = element.shadowRoot?.querySelector('.switch-icon') as HTMLElement;
-      expect(icon.textContent).to.equal('▶'); // Play icon
+      const svg = element.shadowRoot?.querySelector('.switch-icon svg') as SVGElement;
+      expect(svg).to.exist;
+      // Check for play icon (triangle path)
+      const path = svg.querySelector('path[d="M8 5v14l11-7z"]');
+      expect(path).to.exist;
     });
 
     it('should display correct icon for recording state', async () => {
@@ -1572,8 +1581,11 @@ describe('UnifiedDJControlBlock Visual State Indicators and Animations', () => {
       await element.updateComplete;
       await element.updateComplete; // Wait for another update cycle
       
-      const icon = element.shadowRoot?.querySelector('.switch-icon') as HTMLElement;
-      expect(icon.textContent).to.equal('●'); // Record icon
+      const svg = element.shadowRoot?.querySelector('.switch-icon svg') as SVGElement;
+      expect(svg).to.exist;
+      // Check for record icon (circle)
+      const circle = svg.querySelector('circle[cx="12"][cy="12"][r="8"]');
+      expect(circle).to.exist;
     });
 
     it('should display correct icon for loading state', async () => {
@@ -1581,8 +1593,11 @@ describe('UnifiedDJControlBlock Visual State Indicators and Animations', () => {
       await element.updateComplete;
       await element.updateComplete; // Wait for another update cycle
       
-      const icon = element.shadowRoot?.querySelector('.switch-icon') as HTMLElement;
-      expect(icon.textContent).to.equal('◐'); // Loading/refresh icon
+      const svg = element.shadowRoot?.querySelector('.switch-icon svg') as SVGElement;
+      expect(svg).to.exist;
+      // Check for loading icon (partial circle path)
+      const path = svg.querySelector('path[d="M21 12a9 9 0 11-6.219-8.56"]');
+      expect(path).to.exist;
     });
   });
 });

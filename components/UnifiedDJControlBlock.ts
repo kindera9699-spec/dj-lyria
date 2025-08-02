@@ -224,46 +224,53 @@ export class UnifiedDJControlBlock extends LitElement {
     }
 
     .switch-icon {
-      /* Icon sizing proportional to button size */
-      font-size: 16px;
-      color: #fff;
-      transition: all 0.2s ease;
-      text-shadow: 
-        0 1px 2px rgba(0, 0, 0, 0.8),
-        0 0 4px rgba(255, 255, 255, 0.1);
-      filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.5));
-      /* Ensure icons remain crisp at all sizes */
-      -webkit-font-smoothing: antialiased;
-      -moz-osx-font-smoothing: grayscale;
-      /* Center the icon perfectly */
+      /* Perfect centering for SVG icons */
       display: flex;
       align-items: center;
       justify-content: center;
-      line-height: 1;
+      width: 100%;
+      height: 100%;
+      color: #fff;
+      transition: all 0.2s ease;
+      /* Enhanced shadow effects for SVG icons */
+      filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.8)) 
+              drop-shadow(0 0 4px rgba(255, 255, 255, 0.1));
     }
 
-    /* Responsive breakpoints for icon sizing */
+    .switch-icon svg {
+      /* SVG sizing to occupy most of button while staying sleek */
+      width: 32px;
+      height: 32px;
+      /* Ensure crisp rendering */
+      shape-rendering: geometricPrecision;
+    }
+
+    /* Responsive breakpoints for SVG icon sizing */
     @media (max-width: 480px) {
-      .switch-icon {
-        font-size: 12px;
+      .switch-icon svg {
+        width: 24px;
+        height: 24px;
       }
     }
 
     @media (min-width: 481px) and (max-width: 768px) {
-      .switch-icon {
-        font-size: 14px;
+      .switch-icon svg {
+        width: 28px;
+        height: 28px;
       }
     }
 
     @media (min-width: 769px) and (max-width: 1024px) {
-      .switch-icon {
-        font-size: 15px;
+      .switch-icon svg {
+        width: 30px;
+        height: 30px;
       }
     }
 
     @media (min-width: 1025px) {
-      .switch-icon {
-        font-size: 16px;
+      .switch-icon svg {
+        width: 32px;
+        height: 32px;
       }
     }
 
@@ -406,6 +413,8 @@ export class UnifiedDJControlBlock extends LitElement {
         0 1px 2px rgba(0, 0, 0, 0.8),
         0 0 4px rgba(187, 187, 187, 0.3);
       transition: color 0.3s ease;
+      /* Ensure the icon spins around its own center */
+      transform-origin: center center;
     }
 
     /* Enhanced keyframe animations */
@@ -691,16 +700,37 @@ export class UnifiedDJControlBlock extends LitElement {
   private renderIcon() {
     switch (this.controlState.mode) {
       case 'playing':
-        return '⏸'; // Clean pause symbol
+        return html`
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+            <rect x="6" y="4" width="4" height="16" rx="1"/>
+            <rect x="14" y="4" width="4" height="16" rx="1"/>
+          </svg>
+        `;
       case 'paused':
       case 'idle':
-        return '▶'; // Clean play symbol
+        return html`
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M8 5v14l11-7z"/>
+          </svg>
+        `;
       case 'recording':
-        return '●'; // Clean record dot
+        return html`
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+            <circle cx="12" cy="12" r="8"/>
+          </svg>
+        `;
       case 'loading':
-        return '◐'; // Clean loading symbol
+        return html`
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 12a9 9 0 11-6.219-8.56"/>
+          </svg>
+        `;
       default:
-        return '▶';
+        return html`
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M8 5v14l11-7z"/>
+          </svg>
+        `;
     }
   }
 
