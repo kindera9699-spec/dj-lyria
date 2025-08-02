@@ -389,27 +389,31 @@ export class UnifiedDJControlBlock extends LitElement {
     .dj-hardware-switch.loading {
       background: 
         linear-gradient(145deg, 
-          #666666 0%, 
-          #555555 25%, 
-          #444444 50%, 
-          #333333 75%, 
-          #222222 100%);
-      border-color: #777777;
+          #ffcc00 0%, 
+          #e6b800 25%, 
+          #cc9900 50%, 
+          #b38600 75%, 
+          #996600 100%);
+      border-color: #ffdd33;
       box-shadow: 
-        inset 0 2px 4px rgba(255, 255, 255, 0.12),
+        inset 0 2px 4px rgba(255, 255, 255, 0.25),
         inset 0 -2px 4px rgba(0, 0, 0, 0.4),
-        inset 2px 0 3px rgba(255, 255, 255, 0.08),
+        inset 2px 0 3px rgba(255, 255, 255, 0.15),
         inset -2px 0 3px rgba(0, 0, 0, 0.2),
-        0 4px 8px rgba(0, 0, 0, 0.3);
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        0 4px 12px rgba(255, 204, 0, 0.4),
+        0 0 16px rgba(255, 204, 0, 0.3),
+        0 0 0 1px rgba(255, 221, 51, 0.5);
+      animation: loading-pulse 1.5s ease-in-out infinite;
+      transition: background 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
     .dj-hardware-switch.loading .switch-icon {
       animation: loading-spin 1s linear infinite;
-      color: #bbbbbb;
+      color: #ffffff;
       text-shadow: 
         0 1px 2px rgba(0, 0, 0, 0.8),
-        0 0 4px rgba(187, 187, 187, 0.3);
+        0 0 8px rgba(255, 204, 0, 0.8),
+        0 0 12px rgba(255, 255, 255, 0.3);
       transition: color 0.3s ease;
       /* Ensure the icon spins around its own center */
       transform-origin: center center;
@@ -455,6 +459,31 @@ export class UnifiedDJControlBlock extends LitElement {
           0 1px 2px rgba(0, 0, 0, 0.8),
           0 0 12px rgba(255, 68, 68, 1),
           0 0 16px rgba(255, 255, 255, 0.5);
+      }
+    }
+
+    @keyframes loading-pulse {
+      0%, 100% { 
+        box-shadow: 
+          inset 0 2px 4px rgba(255, 255, 255, 0.25),
+          inset 0 -2px 4px rgba(0, 0, 0, 0.4),
+          inset 2px 0 3px rgba(255, 255, 255, 0.15),
+          inset -2px 0 3px rgba(0, 0, 0, 0.2),
+          0 4px 12px rgba(255, 204, 0, 0.4),
+          0 0 16px rgba(255, 204, 0, 0.3),
+          0 0 0 1px rgba(255, 221, 51, 0.5);
+        transform: scale(1);
+      }
+      50% { 
+        box-shadow: 
+          inset 0 2px 4px rgba(255, 255, 255, 0.25),
+          inset 0 -2px 4px rgba(0, 0, 0, 0.4),
+          inset 2px 0 3px rgba(255, 255, 255, 0.15),
+          inset -2px 0 3px rgba(0, 0, 0, 0.2),
+          0 4px 20px rgba(255, 204, 0, 0.6),
+          0 0 28px rgba(255, 204, 0, 0.5),
+          0 0 0 2px rgba(255, 221, 51, 0.7);
+        transform: scale(1.02);
       }
     }
 
