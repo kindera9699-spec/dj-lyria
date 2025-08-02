@@ -15,7 +15,6 @@ interface DJControlState {
   holdTimer: number | null;
   previousMode?: 'idle' | 'playing' | 'paused'; // Track previous state for recording return
   lastClickTime: number; // For debouncing rapid clicks
-  debounceTimer: number | null; // For debouncing state changes
 }
 
 
@@ -44,7 +43,7 @@ const VALID_TRANSITIONS: Record<string, string[]> = {
  */
 @customElement('unified-dj-control-block')
 export class UnifiedDJControlBlock extends LitElement {
-  @property({ type: String }) playbackState: PlaybackState = 'stopped';
+  @property({ type: String }) playbackState: PlaybackState = 'stopped'; // Maps to 'idle' mode internally
   @property({ type: Boolean }) isRecording = false;
 
   @state() private controlState: DJControlState = {
@@ -52,7 +51,6 @@ export class UnifiedDJControlBlock extends LitElement {
     isPressed: false,
     holdTimer: null,
     lastClickTime: 0,
-    debounceTimer: null,
   };
 
   static override styles = css`
@@ -619,7 +617,6 @@ export class UnifiedDJControlBlock extends LitElement {
       holdTimer: null,
       previousMode: undefined,
       lastClickTime: 0,
-      debounceTimer: null,
     };
     this.updateControlState();
   }
@@ -629,7 +626,6 @@ export class UnifiedDJControlBlock extends LitElement {
    */
   private cleanupState() {
     this.clearHoldTimer();
-    this.clearDebounceTimer();
     // Reset to idle state on cleanup
     this.controlState = {
       ...this.controlState,
@@ -637,7 +633,6 @@ export class UnifiedDJControlBlock extends LitElement {
       isPressed: false,
       previousMode: undefined,
       lastClickTime: 0,
-      debounceTimer: null,
     };
   }
 
@@ -707,10 +702,16 @@ export class UnifiedDJControlBlock extends LitElement {
           </svg>
         `;
       case 'paused':
-      case 'idle':
         return html`
           <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
             <path d="M8 5v14l11-7z"/>
+          </svg>
+        `;
+      case 'idle':
+        return html`
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <path d="M18.36 6.64a9 9 0 1 1-12.73 0"/>
+            <line x1="12" y1="2" x2="12" y2="12"/>
           </svg>
         `;
       case 'recording':
@@ -727,8 +728,9 @@ export class UnifiedDJControlBlock extends LitElement {
         `;
       default:
         return html`
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
-            <path d="M8 5v14l11-7z"/>
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <path d="M18.36 6.64a9 9 0 1 1-12.73 0"/>
+            <line x1="12" y1="2" x2="12" y2="12"/>
           </svg>
         `;
     }
@@ -738,21 +740,14 @@ export class UnifiedDJControlBlock extends LitElement {
     const currentTime = Date.now();
     const timeSinceLastClick = currentTime - this.controlState.lastClickTime;
     
-    // Debounce rapid clicks (prevent clicks within 150ms of each other)
-    if (timeSinceLastClick < 150) {
+    // Simplified debounce: prevent clicks within 200ms of each other
+    if (timeSinceLastClick < 200) {
       return;
     }
 
-    // Update last click time
+    // Update last click time and execute action immediately
     this.controlState = { ...this.controlState, lastClickTime: currentTime };
-
-    // Clear any existing debounce timer
-    this.clearDebounceTimer();
-
-    // Debounce the actual action to prevent rapid state changes
-    this.controlState.debounceTimer = window.setTimeout(() => {
-      this.executeClickAction();
-    }, 50); // Small delay to ensure smooth interaction
+    this.executeClickAction();
   }
 
   /**
@@ -764,10 +759,12 @@ export class UnifiedDJControlBlock extends LitElement {
       return;
     }
 
-    // Handle recording state - return to previous state
+    // Handle recording state - stop recording and transition to paused state
     if (this.controlState.mode === 'recording') {
       // Dispatch record stop event (matches existing RecordButton event pattern)
       this.dispatchEvent(new CustomEvent('record-click'));
+      // Note: The actual state transition will happen when isRecording prop updates
+      // The parent should set playbackState to 'paused' after stopping recording
       return;
     }
 
@@ -825,15 +822,7 @@ export class UnifiedDJControlBlock extends LitElement {
     }
   }
 
-  /**
-   * Clear the debounce timer safely
-   */
-  private clearDebounceTimer() {
-    if (this.controlState.debounceTimer) {
-      clearTimeout(this.controlState.debounceTimer);
-      this.controlState.debounceTimer = null;
-    }
-  }
+
 
   private handleKeyDown(e: KeyboardEvent) {
     if (e.key === 'Enter' || e.key === ' ') {

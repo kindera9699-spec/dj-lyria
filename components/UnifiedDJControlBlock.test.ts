@@ -265,7 +265,7 @@ describe('UnifiedDJControlBlock Click and Hold Interaction', () => {
   });
 
   describe('Debouncing Logic', () => {
-    it('should prevent rapid clicks within 150ms', async () => {
+    it('should prevent rapid clicks within 200ms', async () => {
       let clickCount = 0;
       element.addEventListener('play-pause-click', () => { clickCount++; });
       
@@ -276,8 +276,8 @@ describe('UnifiedDJControlBlock Click and Hold Interaction', () => {
       button.click();
       button.click();
       
-      // Wait for debounce timers
-      await new Promise(resolve => setTimeout(resolve, 200));
+      // Wait for debounce period
+      await new Promise(resolve => setTimeout(resolve, 250));
       
       // Only the first click should have been processed
       expect(clickCount).to.equal(1);
@@ -303,20 +303,14 @@ describe('UnifiedDJControlBlock Click and Hold Interaction', () => {
       expect(clickCount).to.equal(2);
     });
 
-    it('should debounce state changes with 50ms delay', async () => {
+    it('should execute actions immediately after debounce check', async () => {
       let eventEmitted = false;
       element.addEventListener('play-pause-click', () => { eventEmitted = true; });
       
       const button = element.shadowRoot?.querySelector('.dj-hardware-switch') as HTMLElement;
       button.click();
       
-      // Check immediately - should not be emitted yet
-      expect(eventEmitted).to.be.false;
-      
-      // Wait for debounce delay
-      await new Promise(resolve => setTimeout(resolve, 60));
-      
-      // Now should be emitted
+      // With simplified debounce, action should execute immediately
       expect(eventEmitted).to.be.true;
     });
   });
@@ -386,7 +380,7 @@ describe('UnifiedDJControlBlock Click and Hold Interaction', () => {
 
     it('should ignore other key presses', async () => {
       let eventEmitted = false;
-      element.addEventListener('dj-control-play', () => { eventEmitted = true; });
+      element.addEventListener('play-pause-click', () => { eventEmitted = true; });
       
       const button = element.shadowRoot?.querySelector('.dj-hardware-switch') as HTMLElement;
       
@@ -462,7 +456,7 @@ describe('UnifiedDJControlBlock Click and Hold Interaction', () => {
 
     it('should not emit events if component is disconnected during timer', async () => {
       let eventEmitted = false;
-      element.addEventListener('dj-control-record-start', () => { eventEmitted = true; });
+      element.addEventListener('record-click', () => { eventEmitted = true; });
       
       const button = element.shadowRoot?.querySelector('.dj-hardware-switch') as HTMLElement;
       
@@ -485,7 +479,7 @@ describe('UnifiedDJControlBlock Click and Hold Interaction', () => {
       await element.updateComplete;
       
       let eventEmitted = false;
-      element.addEventListener('dj-control-play', () => { eventEmitted = true; });
+      element.addEventListener('play-pause-click', () => { eventEmitted = true; });
       
       const button = element.shadowRoot?.querySelector('.dj-hardware-switch') as HTMLElement;
       button.click();
@@ -501,7 +495,7 @@ describe('UnifiedDJControlBlock Click and Hold Interaction', () => {
       await element.updateComplete;
       
       let eventEmitted = false;
-      element.addEventListener('dj-control-record-start', () => { eventEmitted = true; });
+      element.addEventListener('record-click', () => { eventEmitted = true; });
       
       const button = element.shadowRoot?.querySelector('.dj-hardware-switch') as HTMLElement;
       button.dispatchEvent(new MouseEvent('mousedown', { bubbles: true }));
@@ -1028,29 +1022,21 @@ describe('UnifiedDJControlBlock Timer Management', () => {
       expect(clickCount).to.equal(2);
     });
 
-    it('should use 50ms debounce delay for state changes', async () => {
+    it('should execute actions immediately with simplified debounce', async () => {
       const button = element.shadowRoot?.querySelector('.dj-hardware-switch') as HTMLElement;
       
       let eventEmitted = false;
-      const startTime = Date.now();
-      
       element.addEventListener('play-pause-click', () => {
-        const elapsed = Date.now() - startTime;
-        expect(elapsed).to.be.at.least(50);
         eventEmitted = true;
       });
       
       button.click();
       
-      // Check immediately - should not be emitted yet
-      expect(eventEmitted).to.be.false;
-      
-      await new Promise(resolve => setTimeout(resolve, 60));
-      
+      // With simplified debounce, action should execute immediately
       expect(eventEmitted).to.be.true;
     });
 
-    it('should clean up debounce timer on component disconnect', async () => {
+    it('should handle component disconnect gracefully', async () => {
       const button = element.shadowRoot?.querySelector('.dj-hardware-switch') as HTMLElement;
       
       let eventEmitted = false;
@@ -1058,15 +1044,12 @@ describe('UnifiedDJControlBlock Timer Management', () => {
         eventEmitted = true;
       });
       
-      // Start debounce
+      // Click and then disconnect
       button.click();
-      
-      // Disconnect before debounce fires
       element.disconnectedCallback();
       
-      await new Promise(resolve => setTimeout(resolve, 100));
-      
-      expect(eventEmitted).to.be.false;
+      // Event should have been emitted immediately
+      expect(eventEmitted).to.be.true;
     });
   });
 
@@ -1547,9 +1530,11 @@ describe('UnifiedDJControlBlock Visual State Indicators and Animations', () => {
     it('should display correct icon for idle state', () => {
       const svg = element.shadowRoot?.querySelector('.switch-icon svg') as SVGElement;
       expect(svg).to.exist;
-      // Check for play icon (triangle path)
-      const path = svg.querySelector('path[d="M8 5v14l11-7z"]');
+      // Check for power symbol (partial circle path and line)
+      const path = svg.querySelector('path[d="M18.36 6.64a9 9 0 1 1-12.73 0"]');
+      const line = svg.querySelector('line[x1="12"][y1="2"][x2="12"][y2="12"]');
       expect(path).to.exist;
+      expect(line).to.exist;
     });
 
     it('should display correct icon for playing state', async () => {
