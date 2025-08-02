@@ -105,9 +105,9 @@ export class UnifiedDJControlBlock extends LitElement {
 
     .dj-hardware-switch {
       position: relative;
-      /* Perfect circle with responsive sizing */
-      width: clamp(50px, 12vmin, 80px);
-      height: clamp(50px, 12vmin, 80px);
+      /* Perfect circle with appropriate header sizing */
+      width: 50px;
+      height: 50px;
       border-radius: 50%;
       /* Premium power button metallic finish */
       background: 
@@ -152,33 +152,33 @@ export class UnifiedDJControlBlock extends LitElement {
     /* Responsive breakpoints for power button */
     @media (max-width: 480px) {
       .dj-hardware-switch {
-        width: 45px;
-        height: 45px;
+        width: 40px;
+        height: 40px;
         border-width: 2px;
       }
     }
 
     @media (min-width: 481px) and (max-width: 768px) {
       .dj-hardware-switch {
-        width: 55px;
-        height: 55px;
-        border-width: 2.5px;
+        width: 45px;
+        height: 45px;
+        border-width: 2px;
       }
     }
 
     @media (min-width: 769px) and (max-width: 1024px) {
       .dj-hardware-switch {
-        width: 65px;
-        height: 65px;
-        border-width: 3px;
+        width: 48px;
+        height: 48px;
+        border-width: 2px;
       }
     }
 
     @media (min-width: 1025px) {
       .dj-hardware-switch {
-        width: 75px;
-        height: 75px;
-        border-width: 3px;
+        width: 50px;
+        height: 50px;
+        border-width: 2px;
       }
     }
 
@@ -224,8 +224,8 @@ export class UnifiedDJControlBlock extends LitElement {
     }
 
     .switch-icon {
-      /* Responsive font sizing for icons */
-      font-size: clamp(14px, 4vmin, 24px);
+      /* Icon sizing proportional to button size */
+      font-size: 16px;
       color: #fff;
       transition: all 0.2s ease;
       text-shadow: 
@@ -251,19 +251,19 @@ export class UnifiedDJControlBlock extends LitElement {
 
     @media (min-width: 481px) and (max-width: 768px) {
       .switch-icon {
-        font-size: 16px;
+        font-size: 14px;
       }
     }
 
     @media (min-width: 769px) and (max-width: 1024px) {
       .switch-icon {
-        font-size: 18px;
+        font-size: 15px;
       }
     }
 
     @media (min-width: 1025px) {
       .switch-icon {
-        font-size: 20px;
+        font-size: 16px;
       }
     }
 
