@@ -105,9 +105,9 @@ export class UnifiedDJControlBlock extends LitElement {
 
     .dj-hardware-switch {
       position: relative;
-      /* Perfect circle with appropriate header sizing */
-      width: 50px;
-      height: 50px;
+      /* Perfect circle with balanced header sizing */
+      width: 64px;
+      height: 64px;
       border-radius: 50%;
       /* Premium power button metallic finish */
       background: 
@@ -152,32 +152,32 @@ export class UnifiedDJControlBlock extends LitElement {
     /* Responsive breakpoints for power button */
     @media (max-width: 480px) {
       .dj-hardware-switch {
-        width: 40px;
-        height: 40px;
+        width: 50px;
+        height: 50px;
         border-width: 2px;
       }
     }
 
     @media (min-width: 481px) and (max-width: 768px) {
       .dj-hardware-switch {
-        width: 45px;
-        height: 45px;
+        width: 56px;
+        height: 56px;
         border-width: 2px;
       }
     }
 
     @media (min-width: 769px) and (max-width: 1024px) {
       .dj-hardware-switch {
-        width: 48px;
-        height: 48px;
+        width: 60px;
+        height: 60px;
         border-width: 2px;
       }
     }
 
     @media (min-width: 1025px) {
       .dj-hardware-switch {
-        width: 50px;
-        height: 50px;
+        width: 64px;
+        height: 64px;
         border-width: 2px;
       }
     }
