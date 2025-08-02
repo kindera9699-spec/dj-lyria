@@ -17,18 +17,27 @@ export class DSPOverloadIndicator extends LitElement {
     :host {
       position: relative;
       background: rgba(0, 0, 0, 0.6);
-      padding: 8px 12px;
+      padding: 0 12px;
       border-radius: 5px;
       border: 1px solid #555;
       color: white;
-      display: none; /* Hidden by default */
-      text-align: center;
       width: 100%;
       box-sizing: border-box;
+      overflow: hidden;
+      opacity: 0;
+      max-height: 0;
+      margin-bottom: 0;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
 
     :host(.is-visible) {
-      display: block;
+      opacity: 1;
+      max-height: 100px;
+      padding: 16px 12px;
+      margin-bottom: 15px;
       box-shadow: 0 0 5px var(--rgb-color), 0 0 10px var(--rgb-color);
     }
   `;

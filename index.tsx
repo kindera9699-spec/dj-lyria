@@ -382,9 +382,7 @@ export class PromptDjMidi extends LitElement {
       display: inline-block; /* Allow padding and alignment */
       text-align: center;
     }
-    .advanced-settings-panel dsp-overload-indicator {
-      margin-bottom: 15px;
-    }
+
     #buttons .flow-parameters-group {
       display: flex;
       align-items: center;
