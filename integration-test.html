@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UnifiedDJControlBlock Integration Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background: #111;
+            color: #fff;
+        }
+        .test-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 20px;
+            border: 1px solid #333;
+            border-radius: 8px;
+        }
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+        }
+        .status.success {
+            background: #2d5a2d;
+            border: 1px solid #4a8a4a;
+        }
+        .status.error {
+            background: #5a2d2d;
+            border: 1px solid #8a4a4a;
+        }
+        .status.info {
+            background: #2d2d5a;
+            border: 1px solid #4a4a8a;
+        }
+        unified-dj-control-block {
+            margin: 20px 0;
+        }
+        button {
+            padding: 10px 20px;
+            margin: 5px;
+            background: #333;
+            color: #fff;
+            border: 1px solid #555;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #444;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>UnifiedDJControlBlock Integration Test</h1>
+        
+        <div class="test-section">
+            <h2>Component Integration Status</h2>
+            <div id="integration-status" class="status info">Testing integration...</div>
+        </div>
+
+        <div class="test-section">
+            <h2>Component Instance</h2>
+            <unified-dj-control-block id="test-component"></unified-dj-control-block>
+        </div>
+
+        <div class="test-section">
+            <h2>State Controls (for testing)</h2>
+            <button onclick="setPlaybackState('stopped')">Set Stopped</button>
+            <button onclick="setPlaybackState('playing')">Set Playing</button>
+            <button onclick="setPlaybackState('paused')">Set Paused</button>
+            <button onclick="setPlaybackState('loading')">Set Loading</button>
+            <button onclick="toggleRecording()">Toggle Recording</button>
+        </div>
+
+        <div class="test-section">
+            <h2>Event Log</h2>
+            <div id="event-log" style="background: #222; padding: 10px; border-radius: 4px; height: 200px; overflow-y: auto;"></div>
+            <button onclick="clearLog()">Clear Log</button>
+        </div>
+    </div>
+
+    <script type="module">
+        import './components/UnifiedDJControlBlock.js';
+        
+        const component = document.getElementById('test-component');
+        const statusDiv = document.getElementById('integration-status');
+        const eventLog = document.getElementById('event-log');
+        
+        let isRecording = false;
+        
+        // Test component integration
+        function testIntegration() {
+            try {
+                // Check if component is defined
+                if (!customElements.get('unified-dj-control-block')) {
+                    throw new Error('UnifiedDJControlBlock not registered');
+                }
+                
+                // Check if component instance exists
+                if (!component) {
+                    throw new Error('Component instance not found');
+                }
+                
+                // Check if component has required properties
+                if (typeof component.playbackState === 'undefined') {
+                    throw new Error('playbackState property not found');
+                }
+                
+                if (typeof component.isRecording === 'undefined') {
+                    throw new Error('isRecording property not found');
+                }
+                
+                statusDiv.className = 'status success';
+                statusDiv.textContent = '✅ Integration successful - Component is properly loaded and configured';
+                
+            } catch (error) {
+                statusDiv.className = 'status error';
+                statusDiv.textContent = `❌ Integration failed: ${error.message}`;
+            }
+        }
+        
+        // Set up event listeners
+        component.addEventListener('play-pause-click', (e) => {
+            logEvent('play-pause-click', 'Play/Pause button clicked');
+        });
+        
+        component.addEventListener('record-click', (e) => {
+            logEvent('record-click', 'Record button clicked');
+        });
+        
+        // Helper functions
+        window.setPlaybackState = (state) => {
+            component.playbackState = state;
+            logEvent('state-change', `Playback state set to: ${state}`);
+        };
+        
+        window.toggleRecording = () => {
+            isRecording = !isRecording;
+            component.isRecording = isRecording;
+            logEvent('state-change', `Recording state set to: ${isRecording}`);
+        };
+        
+        window.clearLog = () => {
+            eventLog.innerHTML = '';
+        };
+        
+        function logEvent(type, message) {
+            const timestamp = new Date().toLocaleTimeString();
+            const logEntry = document.createElement('div');
+            logEntry.innerHTML = `<strong>[${timestamp}]</strong> ${type}: ${message}`;
+            eventLog.appendChild(logEntry);
+            eventLog.scrollTop = eventLog.scrollHeight;
+        }
+        
+        // Initialize test
+        setTimeout(testIntegration, 100);
+        
+        // Initial state
+        component.playbackState = 'stopped';
+        component.isRecording = false;
+        
+        logEvent('init', 'Integration test initialized');
+    </script>
+</body>
+</html>
