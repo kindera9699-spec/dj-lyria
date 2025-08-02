@@ -91,19 +91,18 @@ describe('UnifiedDJControlBlock State Management', () => {
   it('should emit correct events on click', async () => {
     let eventType = '';
     
-    element.addEventListener('dj-control-play', () => { eventType = 'play'; });
-    element.addEventListener('dj-control-pause', () => { eventType = 'pause'; });
-    element.addEventListener('dj-control-record-stop', () => { eventType = 'record-stop'; });
+    element.addEventListener('play-pause-click', () => { eventType = 'play-pause'; });
+    element.addEventListener('record-click', () => { eventType = 'record'; });
     
     const button = element.shadowRoot?.querySelector('.dj-hardware-switch') as HTMLElement;
     
-    // Test play event from idle state
+    // Test play-pause event from idle state
     button.click();
     // Wait for debounce timer
     await new Promise(resolve => setTimeout(resolve, 100));
-    expect(eventType).to.equal('play');
+    expect(eventType).to.equal('play-pause');
     
-    // Test pause event from playing state
+    // Test play-pause event from playing state (same event for both play and pause)
     element.playbackState = 'playing';
     await element.updateComplete;
     await element.updateComplete; // Wait for another update cycle
@@ -113,9 +112,9 @@ describe('UnifiedDJControlBlock State Management', () => {
     button.click();
     // Wait for debounce timer
     await new Promise(resolve => setTimeout(resolve, 100));
-    expect(eventType).to.equal('pause');
+    expect(eventType).to.equal('play-pause');
     
-    // Test record stop event from recording state
+    // Test record event from recording state (record-click for both start and stop)
     element.isRecording = true;
     await element.updateComplete;
     await element.updateComplete; // Wait for another update cycle
@@ -125,7 +124,7 @@ describe('UnifiedDJControlBlock State Management', () => {
     button.click();
     // Wait for debounce timer
     await new Promise(resolve => setTimeout(resolve, 100));
-    expect(eventType).to.equal('record-stop');
+    expect(eventType).to.equal('record');
   });
 
   it('should handle cleanup on disconnect', () => {
@@ -145,9 +144,9 @@ describe('UnifiedDJControlBlock Click and Hold Interaction', () => {
   });
 
   describe('Single Click Detection', () => {
-    it('should emit play event on single click from idle state', async () => {
+    it('should emit play-pause event on single click from idle state', async () => {
       let eventEmitted = false;
-      element.addEventListener('dj-control-play', () => { eventEmitted = true; });
+      element.addEventListener('play-pause-click', () => { eventEmitted = true; });
       
       const button = element.shadowRoot?.querySelector('.dj-hardware-switch') as HTMLElement;
       button.click();
@@ -158,12 +157,12 @@ describe('UnifiedDJControlBlock Click and Hold Interaction', () => {
       expect(eventEmitted).to.be.true;
     });
 
-    it('should emit pause event on single click from playing state', async () => {
+    it('should emit play-pause event on single click from playing state', async () => {
       element.playbackState = 'playing';
       await element.updateComplete;
       
       let eventEmitted = false;
-      element.addEventListener('dj-control-pause', () => { eventEmitted = true; });
+      element.addEventListener('play-pause-click', () => { eventEmitted = true; });
       
       const button = element.shadowRoot?.querySelector('.dj-hardware-switch') as HTMLElement;
       button.click();
@@ -174,12 +173,12 @@ describe('UnifiedDJControlBlock Click and Hold Interaction', () => {
       expect(eventEmitted).to.be.true;
     });
 
-    it('should emit record-stop event on single click from recording state', async () => {
+    it('should emit record event on single click from recording state', async () => {
       element.isRecording = true;
       await element.updateComplete;
       
       let eventEmitted = false;
-      element.addEventListener('dj-control-record-stop', () => { eventEmitted = true; });
+      element.addEventListener('record-click', () => { eventEmitted = true; });
       
       const button = element.shadowRoot?.querySelector('.dj-hardware-switch') as HTMLElement;
       button.click();
@@ -192,9 +191,9 @@ describe('UnifiedDJControlBlock Click and Hold Interaction', () => {
   });
 
   describe('Hold Detection Logic', () => {
-    it('should emit record-start event after holding for 500ms', async () => {
+    it('should emit record event after holding for 500ms', async () => {
       let eventEmitted = false;
-      element.addEventListener('dj-control-record-start', () => { eventEmitted = true; });
+      element.addEventListener('record-click', () => { eventEmitted = true; });
       
       const button = element.shadowRoot?.querySelector('.dj-hardware-switch') as HTMLElement;
       
@@ -207,9 +206,9 @@ describe('UnifiedDJControlBlock Click and Hold Interaction', () => {
       expect(eventEmitted).to.be.true;
     });
 
-    it('should not emit record-start if mouse up occurs before 500ms', async () => {
+    it('should not emit record event if mouse up occurs before 500ms', async () => {
       let eventEmitted = false;
-      element.addEventListener('dj-control-record-start', () => { eventEmitted = true; });
+      element.addEventListener('record-click', () => { eventEmitted = true; });
       
       const button = element.shadowRoot?.querySelector('.dj-hardware-switch') as HTMLElement;
       
@@ -268,7 +267,7 @@ describe('UnifiedDJControlBlock Click and Hold Interaction', () => {
   describe('Debouncing Logic', () => {
     it('should prevent rapid clicks within 150ms', async () => {
       let clickCount = 0;
-      element.addEventListener('dj-control-play', () => { clickCount++; });
+      element.addEventListener('play-pause-click', () => { clickCount++; });
       
       const button = element.shadowRoot?.querySelector('.dj-hardware-switch') as HTMLElement;
       
@@ -286,7 +285,7 @@ describe('UnifiedDJControlBlock Click and Hold Interaction', () => {
 
     it('should allow clicks after debounce period', async () => {
       let clickCount = 0;
-      element.addEventListener('dj-control-play', () => { clickCount++; });
+      element.addEventListener('play-pause-click', () => { clickCount++; });
       
       const button = element.shadowRoot?.querySelector('.dj-hardware-switch') as HTMLElement;
       
@@ -306,7 +305,7 @@ describe('UnifiedDJControlBlock Click and Hold Interaction', () => {
 
     it('should debounce state changes with 50ms delay', async () => {
       let eventEmitted = false;
-      element.addEventListener('dj-control-play', () => { eventEmitted = true; });
+      element.addEventListener('play-pause-click', () => { eventEmitted = true; });
       
       const button = element.shadowRoot?.querySelector('.dj-hardware-switch') as HTMLElement;
       button.click();
@@ -325,7 +324,7 @@ describe('UnifiedDJControlBlock Click and Hold Interaction', () => {
   describe('Keyboard Accessibility', () => {
     it('should handle Enter key press', async () => {
       let eventEmitted = false;
-      element.addEventListener('dj-control-play', () => { eventEmitted = true; });
+      element.addEventListener('play-pause-click', () => { eventEmitted = true; });
       
       const button = element.shadowRoot?.querySelector('.dj-hardware-switch') as HTMLElement;
       
@@ -345,7 +344,7 @@ describe('UnifiedDJControlBlock Click and Hold Interaction', () => {
 
     it('should handle Space key press', async () => {
       let eventEmitted = false;
-      element.addEventListener('dj-control-play', () => { eventEmitted = true; });
+      element.addEventListener('play-pause-click', () => { eventEmitted = true; });
       
       const button = element.shadowRoot?.querySelector('.dj-hardware-switch') as HTMLElement;
       

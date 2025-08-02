@@ -19,6 +19,15 @@ interface DJControlState {
 }
 
 /**
+ * Event interfaces for DJ control events
+ * These match the existing PlayPauseButton and RecordButton event patterns
+ */
+interface DJControlEvents {
+  'play-pause-click': CustomEvent<void>;
+  'record-click': CustomEvent<void>;
+}
+
+/**
  * Valid state transitions for the DJ control
  */
 const VALID_TRANSITIONS: Record<string, string[]> = {
@@ -32,6 +41,13 @@ const VALID_TRANSITIONS: Record<string, string[]> = {
 /**
  * Unified DJ Control Block component that combines play/pause/record functionality
  * into a single hardware-style switch positioned as a sidebar header
+ * 
+ * Events:
+ * - 'play-pause-click': Dispatched for play/pause actions (compatible with PlayPauseButton)
+ * - 'record-click': Dispatched for record start/stop actions (compatible with RecordButton)
+ * 
+ * The component maintains full compatibility with existing event handlers by using
+ * the same event names and payloads as the original PlayPauseButton and RecordButton components.
  */
 @customElement('unified-dj-control-block')
 export class UnifiedDJControlBlock extends LitElement {
@@ -582,13 +598,8 @@ export class UnifiedDJControlBlock extends LitElement {
 
     // Handle recording state - return to previous state
     if (this.controlState.mode === 'recording') {
-      this.dispatchEvent(new CustomEvent('dj-control-record-stop'));
-      
-      // Transition back to previous state if available, otherwise idle
-      const returnMode = this.controlState.previousMode || 'idle';
-      if (this.isValidTransition('recording', returnMode)) {
-        this.transitionToState(returnMode);
-      }
+      // Dispatch record stop event (matches existing RecordButton event pattern)
+      this.dispatchEvent(new CustomEvent('record-click'));
       return;
     }
 
@@ -597,12 +608,14 @@ export class UnifiedDJControlBlock extends LitElement {
       case 'idle':
       case 'paused':
         if (this.isValidTransition(this.controlState.mode, 'playing')) {
-          this.dispatchEvent(new CustomEvent('dj-control-play'));
+          // Dispatch play event (matches existing PlayPauseButton event pattern)
+          this.dispatchEvent(new CustomEvent('play-pause-click'));
         }
         break;
       case 'playing':
         if (this.isValidTransition(this.controlState.mode, 'paused')) {
-          this.dispatchEvent(new CustomEvent('dj-control-pause'));
+          // Dispatch pause event (matches existing PlayPauseButton event pattern)
+          this.dispatchEvent(new CustomEvent('play-pause-click'));
         }
         break;
     }
@@ -616,7 +629,8 @@ export class UnifiedDJControlBlock extends LitElement {
       if (this.controlState.mode !== 'recording' && this.controlState.mode !== 'loading') {
         // Validate transition to recording state
         if (this.isValidTransition(this.controlState.mode, 'recording')) {
-          this.dispatchEvent(new CustomEvent('dj-control-record-start'));
+          // Dispatch record start event (matches existing RecordButton event pattern)
+          this.dispatchEvent(new CustomEvent('record-click'));
           // The actual state transition will happen when isRecording prop updates
         }
       }
@@ -693,5 +707,10 @@ export class UnifiedDJControlBlock extends LitElement {
 declare global {
   interface HTMLElementTagNameMap {
     'unified-dj-control-block': UnifiedDJControlBlock;
+  }
+  
+  interface HTMLElementEventMap {
+    'play-pause-click': CustomEvent<void>;
+    'record-click': CustomEvent<void>;
   }
 }
