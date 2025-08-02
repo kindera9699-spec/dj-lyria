@@ -14,6 +14,8 @@ interface DJControlState {
   isPressed: boolean;
   holdTimer: number | null;
   previousMode?: 'idle' | 'playing' | 'paused'; // Track previous state for recording return
+  lastClickTime: number; // For debouncing rapid clicks
+  debounceTimer: number | null; // For debouncing state changes
 }
 
 /**
@@ -40,6 +42,8 @@ export class UnifiedDJControlBlock extends LitElement {
     mode: 'idle',
     isPressed: false,
     holdTimer: null,
+    lastClickTime: 0,
+    debounceTimer: null,
   };
 
   static override styles = css`
@@ -342,6 +346,8 @@ export class UnifiedDJControlBlock extends LitElement {
       isPressed: false,
       holdTimer: null,
       previousMode: undefined,
+      lastClickTime: 0,
+      debounceTimer: null,
     };
     this.updateControlState();
   }
@@ -351,12 +357,15 @@ export class UnifiedDJControlBlock extends LitElement {
    */
   private cleanupState() {
     this.clearHoldTimer();
+    this.clearDebounceTimer();
     // Reset to idle state on cleanup
     this.controlState = {
       ...this.controlState,
       mode: 'idle',
       isPressed: false,
       previousMode: undefined,
+      lastClickTime: 0,
+      debounceTimer: null,
     };
   }
 
@@ -457,6 +466,30 @@ export class UnifiedDJControlBlock extends LitElement {
   }
 
   private handleClick() {
+    const currentTime = Date.now();
+    const timeSinceLastClick = currentTime - this.controlState.lastClickTime;
+    
+    // Debounce rapid clicks (prevent clicks within 150ms of each other)
+    if (timeSinceLastClick < 150) {
+      return;
+    }
+
+    // Update last click time
+    this.controlState = { ...this.controlState, lastClickTime: currentTime };
+
+    // Clear any existing debounce timer
+    this.clearDebounceTimer();
+
+    // Debounce the actual action to prevent rapid state changes
+    this.controlState.debounceTimer = window.setTimeout(() => {
+      this.executeClickAction();
+    }, 50); // Small delay to ensure smooth interaction
+  }
+
+  /**
+   * Execute the actual click action after debouncing
+   */
+  private executeClickAction() {
     // Prevent action if currently loading
     if (this.controlState.mode === 'loading') {
       return;
@@ -522,6 +555,16 @@ export class UnifiedDJControlBlock extends LitElement {
     if (this.controlState.holdTimer) {
       clearTimeout(this.controlState.holdTimer);
       this.controlState.holdTimer = null;
+    }
+  }
+
+  /**
+   * Clear the debounce timer safely
+   */
+  private clearDebounceTimer() {
+    if (this.controlState.debounceTimer) {
+      clearTimeout(this.controlState.debounceTimer);
+      this.controlState.debounceTimer = null;
     }
   }
 
