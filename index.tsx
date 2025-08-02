@@ -382,25 +382,8 @@ export class PromptDjMidi extends LitElement {
       display: inline-block; /* Allow padding and alignment */
       text-align: center;
     }
-    #buttons dsp-overload-indicator {
-      /* Copied from #buttons button and adjusted */
-      font-weight: 600;
-      cursor: default; /* It's an indicator, not a button */
-      color: #fff;
-      background: rgba(0, 0, 0, 0.4); /* Standardized black alpha */
-      -webkit-font-smoothing: antialiased;
-      border: 1.5px solid #fff;
-      border-radius: 4px;
-      user-select: none;
-      padding: 3px 6px;
-      display: none; /* Original logic for appearing/disappearing */
-      vertical-align: middle;
-      height: auto;
-      box-sizing: border-box;
-    }
-    /* Override display:none when it should be visible */
-    #buttons dsp-overload-indicator.is-visible {
-      display: inline-block;
+    .advanced-settings-panel dsp-overload-indicator {
+      margin-bottom: 15px;
     }
     #buttons .flow-parameters-group {
       display: flex;
@@ -2821,12 +2804,6 @@ export class PromptDjMidi extends LitElement {
     return html`
         <div id="background" style=${bg}></div>
         <div id="buttons">
-          <dsp-overload-indicator
-            .currentPromptAverage=${this.promptWeightedAverage}
-            .currentKnobAverageExtremeness=${this.knobAverageExtremeness}
-            .indicatorColor=${this.dspOverloadIndicatorColor}
-            .blinkDuration=${this.dspOverloadBlinkDuration}
-          ></dsp-overload-indicator>
           <!-- MIDI Controls -->
           <button
             @click=${this.toggleShowMidi}
@@ -3027,6 +3004,12 @@ export class PromptDjMidi extends LitElement {
 ${this.renderPrompts()}
         </div>
 <div class=${advancedClasses}>
+          <dsp-overload-indicator
+            .currentPromptAverage=${this.promptWeightedAverage}
+            .currentKnobAverageExtremeness=${this.knobAverageExtremeness}
+            .indicatorColor=${this.dspOverloadIndicatorColor}
+            .blinkDuration=${this.dspOverloadBlinkDuration}
+          ></dsp-overload-indicator>
           <unified-dj-control-block
             .playbackState=${this.playbackState}
             .isRecording=${this.isRecordingActive}

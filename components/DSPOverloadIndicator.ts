@@ -15,16 +15,16 @@ export class DSPOverloadIndicator extends LitElement {
 
   static styles = css`
     :host {
-      position: fixed;
-      top: 10px;
-      right: 10px;
-      z-index: 9999;
+      position: relative;
       background: rgba(0, 0, 0, 0.6);
       padding: 8px 12px;
       border-radius: 5px;
       border: 1px solid #555;
       color: white;
       display: none; /* Hidden by default */
+      text-align: center;
+      width: 100%;
+      box-sizing: border-box;
     }
 
     :host(.is-visible) {
