@@ -56,6 +56,7 @@ export class DSPOverloadIndicator extends LitElement {
       opacity: 1;
       max-height: 100px;
       padding: 16px 12px;
+      margin-top: 15px;
       margin-bottom: 15px;
     }
   `;
@@ -176,10 +177,10 @@ export class DSPOverloadIndicator extends LitElement {
     this._blinkSpeed = 1;
     this._startBlinking();
 
-    // Set timer to trigger reset after 3 seconds of OVERLOAD state
+    // Set timer to trigger reset after 10 seconds of OVERLOAD state
     this._overloadResetTimer = window.setTimeout(() => {
       this._triggerReset();
-    }, 3000);
+    }, 10000);
   }
 
   private _stopOverloadSequence() {
@@ -202,9 +203,9 @@ export class DSPOverloadIndicator extends LitElement {
         return;
       }
 
-      // Accelerate blinking: start at 500ms, end at 50ms
+      // Accelerate blinking: start at 300ms, end at 25ms
       const progress = blinkCount / maxBlinks;
-      const blinkInterval = 500 - (progress * 450); // 500ms -> 50ms
+      const blinkInterval = 300 - (progress * 275); // 300ms -> 25ms
 
       // Toggle visibility for blink effect
       const isVisible = blinkCount % 2 === 0;
