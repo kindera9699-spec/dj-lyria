@@ -784,8 +784,10 @@ export class UnifiedDJControlBlock extends LitElement {
    * Execute the actual click action after debouncing
    */
   private executeClickAction() {
-    // Prevent action if currently loading
+    // Handle loading state - reset app to idle state when clicked
     if (this.controlState.mode === 'loading') {
+      // Dispatch a reset event to stop loading and return to idle state
+      this.dispatchEvent(new CustomEvent('play-pause-click'));
       return;
     }
 
