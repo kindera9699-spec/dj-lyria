@@ -966,22 +966,31 @@ export class PromptDjMidi extends LitElement {
         if (range === 0) {
           extremenessValues.push(0);
         } else {
-          const extremeness = Math.abs(currentValue - defaultValue) / range;
-          extremenessValues.push(Math.min(1, Math.max(0, extremeness))); // Clamp 0-1
+          // Calculate linear distance from default (0-1)
+          const linearExtremeness = Math.abs(currentValue - defaultValue) / range;
+          const clampedLinear = Math.min(1, Math.max(0, linearExtremeness));
+          
+          // Apply exponential scaling: closer to default = much less contribution
+          // Using power of 0.5 for very aggressive curve that shows strong impact at extremes
+          const exponentialExtremeness = Math.pow(clampedLinear, 0.5);
+          
+          // Temporary debug logging
+          if (exponentialExtremeness > 0.1) {
+            console.log(`${knobId}: ${currentValue.toFixed(2)} -> linear: ${clampedLinear.toFixed(3)}, exponential: ${exponentialExtremeness.toFixed(3)}`);
+          }
+          
+          extremenessValues.push(exponentialExtremeness);
         }
       }
     }
 
-    // Handle scale selector
-    if (this.config.scale === PromptDjMidi.INITIAL_CONFIG.scale) {
-      extremenessValues.push(0);
-    } else {
-      extremenessValues.push(1);
-    }
+    // Scale selector excluded from DSP overload calculation
 
     if (extremenessValues.length > 0) {
       const sum = extremenessValues.reduce((acc, val) => acc + val, 0);
       this.knobAverageExtremeness = sum / extremenessValues.length;
+      
+
     } else {
       this.knobAverageExtremeness = 0;
     }
