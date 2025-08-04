@@ -7,7 +7,7 @@ export const GENRE_COLORS = {
   Ambient: '#20B2AA', // Light Sea Green - calm/atmospheric
   'Lo-fi Hip Hop': '#3CB371', // Medium Sea Green - relaxed
   Chillwave: '#1E90FF', // Dodger Blue - cool/electronic
-  Vaporwave: '#00FA9A', // Medium Spring Green - retro
+  'Future Funk': '#00FA9A', // Medium Spring Green - retro
   Shoegaze: '#FFD700', // Gold - dreamy
   'Ethereal Vibes': '#4682B4', // Steel Blue - airy
   'Nu Jazz': '#BA55D3', // Medium Orchid - jazzy
