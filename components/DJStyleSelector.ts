@@ -41,7 +41,7 @@ export class DJStyleSelector extends LitElement {
       gap: 5px;
     }
     .option {
-      background-color: #333;
+      background-color: rgba(0, 0, 0, 0.4);
       color: #fff;
       border: 1px solid #555;
       border-radius: 4px;
@@ -52,9 +52,8 @@ export class DJStyleSelector extends LitElement {
       font-size: 0.9em;
     }
     .option:hover {
-      background-color: #444; /* Keep or slightly adjust for hover indication */
-      /* Add a very subtle shadow using the option's color */
-      box-shadow: 0 0 4px -1px var(--glow-color, #007bff);
+      background-color: rgba(0, 0, 0, 0.5);
+      box-shadow: 0 0 5px -1px #007bff;
     }
     .option.selected {
       /* Common styles for all selected options, including .auto-scale-selected */
@@ -64,13 +63,24 @@ export class DJStyleSelector extends LitElement {
     }
     .option.selected:not(.auto-scale-selected) {
       /* Styles specific to selected options that are NOT .auto-scale-selected */
-      background-color: var(--glow-color, #007bff);
-      box-shadow: 0 0 7px var(--glow-color, #007bff);
+      background-color: rgba(0, 0, 0, 0.4);
+      box-shadow: 0 0 12px var(--glow-color, #007bff), 0 0 24px var(--glow-color, #007bff);
+    }
+    .option[data-auto-scale] {
+      /* Auto scale button always uses dark background style */
+      background-color: rgba(0, 0, 0, 0.4) !important;
+    }
+    .option[data-auto-scale]:hover {
+      /* Hover styles for auto scale button */
+      background-color: rgba(0, 0, 0, 0.5) !important;
+      box-shadow: 0 0 5px -1px #007bff;
     }
     .option.auto-scale-selected {
       /* Styles specific to the selected "Auto" scale option */
       border: 1px solid transparent;
       animation: rgb-glow 40s linear infinite;
+      /* Keep the dark background even when selected */
+      background-color: rgba(0, 0, 0, 0.4) !important;
     }
   `;
 
@@ -113,10 +123,11 @@ export class DJStyleSelector extends LitElement {
         // So, we can either not set --glow-color for it, or ensure our new class overrides it.
         // Let's try not setting the inline style that defines --glow-color for the selected Auto Scale.
 
-        if (isAutoScale && isSelected) {
+        if (isAutoScale) {
           return html`
               <div
                 class="${classes}"
+                data-auto-scale
                 @click=${() => this._handleOptionClick(option.value)}
               >
                 ${option.label}
