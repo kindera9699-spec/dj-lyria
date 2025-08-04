@@ -769,8 +769,9 @@ export class UnifiedDJControlBlock extends LitElement {
     const currentTime = Date.now();
     const timeSinceLastClick = currentTime - this.controlState.lastClickTime;
 
-    // Simplified debounce: prevent clicks within 200ms of each other
-    if (timeSinceLastClick < 200) {
+    // Simplified debounce: prevent clicks within 150ms of each other
+    // This allows for better keyboard/mouse interaction compatibility
+    if (timeSinceLastClick < 150) {
       return;
     }
 
