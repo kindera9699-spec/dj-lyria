@@ -2453,8 +2453,8 @@ export class PromptDjMidi extends LitElement {
   private handleDspOverloadReset(event: CustomEvent) {
     console.log('🚨 DSP OVERLOAD DETECTED! Triggering system reset...', event.detail);
     
-    // Immediately reset power button to idle state
-    this.playbackState = 'stopped';
+    // Immediately stop any audio and reset power button to idle state
+    this.stop();
     
     // Add a small delay for dramatic effect
     setTimeout(() => {
@@ -2466,8 +2466,8 @@ export class PromptDjMidi extends LitElement {
   private resetAll() {
     this.config = { ...PromptDjMidi.INITIAL_CONFIG };
     
-    // Reset power button to idle state
-    this.playbackState = 'stopped';
+    // Reset power button to idle state by stopping audio properly
+    this.stop();
 
     this.autoDensity = PromptDjMidi.INITIAL_AUTO_STATES.autoDensity;
     this.autoBrightness = PromptDjMidi.INITIAL_AUTO_STATES.autoBrightness;
