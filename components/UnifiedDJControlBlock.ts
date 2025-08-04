@@ -17,8 +17,6 @@ interface DJControlState {
   lastClickTime: number; // For debouncing rapid clicks
 }
 
-
-
 /**
  * Valid state transitions for the DJ control
  */
@@ -33,11 +31,11 @@ const VALID_TRANSITIONS: Record<string, string[]> = {
 /**
  * Unified DJ Control Block component that combines play/pause/record functionality
  * into a single hardware-style switch positioned as a sidebar header
- * 
+ *
  * Events:
  * - 'play-pause-click': Dispatched for play/pause actions (compatible with PlayPauseButton)
  * - 'record-click': Dispatched for record start/stop actions (compatible with RecordButton)
- * 
+ *
  * The component maintains full compatibility with existing event handlers by using
  * the same event names and payloads as the original PlayPauseButton and RecordButton components.
  */
@@ -630,8 +628,11 @@ export class UnifiedDJControlBlock extends LitElement {
 
   override updated(changedProperties: Map<string | number | symbol, unknown>) {
     super.updated(changedProperties);
-    
-    if (changedProperties.has('playbackState') || changedProperties.has('isRecording')) {
+
+    if (
+      changedProperties.has('playbackState') ||
+      changedProperties.has('isRecording')
+    ) {
       this.updateControlState();
     }
   }
@@ -665,8 +666,6 @@ export class UnifiedDJControlBlock extends LitElement {
     };
   }
 
-
-
   /**
    * Validate if a state transition is allowed
    */
@@ -674,8 +673,6 @@ export class UnifiedDJControlBlock extends LitElement {
     const validTransitions = VALID_TRANSITIONS[fromState];
     return validTransitions ? validTransitions.includes(toState) : false;
   }
-
-
 
   /**
    * Update control state based on external props (bypasses validation for prop-driven changes)
@@ -707,7 +704,10 @@ export class UnifiedDJControlBlock extends LitElement {
     // Only update if the mode actually changed
     if (targetMode !== this.controlState.mode) {
       // Store previous mode when entering recording state
-      const previousMode = targetMode === 'recording' ? this.controlState.mode : this.controlState.previousMode;
+      const previousMode =
+        targetMode === 'recording'
+          ? this.controlState.mode
+          : this.controlState.previousMode;
 
       // Update state directly for prop-driven changes (no validation needed)
       const newState = {
@@ -715,7 +715,7 @@ export class UnifiedDJControlBlock extends LitElement {
         mode: targetMode,
         previousMode: previousMode as 'idle' | 'playing' | 'paused' | undefined,
       };
-      
+
       this.controlState = newState;
       this.requestUpdate();
     }
@@ -768,7 +768,7 @@ export class UnifiedDJControlBlock extends LitElement {
   private handleClick() {
     const currentTime = Date.now();
     const timeSinceLastClick = currentTime - this.controlState.lastClickTime;
-    
+
     // Simplified debounce: prevent clicks within 200ms of each other
     if (timeSinceLastClick < 200) {
       return;
@@ -817,10 +817,13 @@ export class UnifiedDJControlBlock extends LitElement {
 
   private handleMouseDown() {
     this.controlState = { ...this.controlState, isPressed: true };
-    
+
     // Set up hold timer for record functionality
     this.controlState.holdTimer = window.setTimeout(() => {
-      if (this.controlState.mode !== 'recording' && this.controlState.mode !== 'loading') {
+      if (
+        this.controlState.mode !== 'recording' &&
+        this.controlState.mode !== 'loading'
+      ) {
         // Validate transition to recording state
         if (this.isValidTransition(this.controlState.mode, 'recording')) {
           // Dispatch record start event (matches existing RecordButton event pattern)
@@ -835,7 +838,7 @@ export class UnifiedDJControlBlock extends LitElement {
 
   private handleMouseUp() {
     this.controlState = { ...this.controlState, isPressed: false };
-    
+
     // Clear hold timer using cleanup method
     this.clearHoldTimer();
     this.requestUpdate();
@@ -851,8 +854,6 @@ export class UnifiedDJControlBlock extends LitElement {
     }
   }
 
-
-
   private handleKeyDown(e: KeyboardEvent) {
     if (e.key === 'Enter' || e.key === ' ') {
       e.preventDefault();
@@ -864,7 +865,7 @@ export class UnifiedDJControlBlock extends LitElement {
     const switchClasses = {
       'dj-hardware-switch': true,
       [this.controlState.mode]: true,
-      'pressed': this.controlState.isPressed,
+      pressed: this.controlState.isPressed,
     };
 
     return html`
@@ -892,7 +893,7 @@ declare global {
   interface HTMLElementTagNameMap {
     'unified-dj-control-block': UnifiedDJControlBlock;
   }
-  
+
   interface HTMLElementEventMap {
     'play-pause-click': CustomEvent<void>;
     'record-click': CustomEvent<void>;

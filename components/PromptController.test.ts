@@ -70,7 +70,6 @@ describe('PromptController', () => {
       promptId: 'test-prompt',
       isAutoFlowing: true,
     });
-
   });
 
   it('Scenario 2: Auto active (weight 1, isAutoFlowing true) -> toggle to false (weight becomes 0)', () => {

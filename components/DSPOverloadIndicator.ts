@@ -21,12 +21,12 @@ export class DSPOverloadIndicator extends LitElement {
 
   // Progressive color stops: Green → Yellow → Red → Purple → Blue → OVERLOAD
   private readonly colorStops: OverloadColorStop[] = [
-    { threshold: 0.0, color: { r: 0, g: 255, b: 0 }, name: 'Safe' },      // Green
-    { threshold: 0.3, color: { r: 255, g: 255, b: 0 }, name: 'Caution' }, // Yellow  
-    { threshold: 0.6, color: { r: 255, g: 0, b: 0 }, name: 'Warning' },   // Red
+    { threshold: 0.0, color: { r: 0, g: 255, b: 0 }, name: 'Safe' }, // Green
+    { threshold: 0.3, color: { r: 255, g: 255, b: 0 }, name: 'Caution' }, // Yellow
+    { threshold: 0.6, color: { r: 255, g: 0, b: 0 }, name: 'Warning' }, // Red
     { threshold: 0.8, color: { r: 128, g: 0, b: 128 }, name: 'Critical' }, // Purple
-    { threshold: 1.0, color: { r: 0, g: 0, b: 255 }, name: 'Extreme' },   // Blue
-    { threshold: 1.2, color: { r: 255, g: 0, b: 0 }, name: 'OVERLOAD' },  // Red (Easter egg)
+    { threshold: 1.0, color: { r: 0, g: 0, b: 255 }, name: 'Extreme' }, // Blue
+    { threshold: 1.2, color: { r: 255, g: 0, b: 0 }, name: 'OVERLOAD' }, // Red (Easter egg)
   ];
 
   static styles = css`
@@ -112,7 +112,9 @@ export class DSPOverloadIndicator extends LitElement {
   }
 
   private updateColorAndGlow() {
-    const { color, intensity } = this.calculateColorAndIntensity(this._overloadLevel);
+    const { color, intensity } = this.calculateColorAndIntensity(
+      this._overloadLevel,
+    );
 
     this._currentColor = `rgb(${color.r}, ${color.g}, ${color.b})`;
 
@@ -120,20 +122,26 @@ export class DSPOverloadIndicator extends LitElement {
     this.style.setProperty('--border-color', this._currentColor);
 
     // Create progressive glow effect with increasing intensity
-    const baseGlow = 4 + (intensity * 12); // 4px to 16px
-    const outerGlow = 8 + (intensity * 24); // 8px to 32px
+    const baseGlow = 4 + intensity * 12; // 4px to 16px
+    const outerGlow = 8 + intensity * 24; // 8px to 32px
     const glowShadow = `0 0 ${baseGlow}px ${this._currentColor}, 0 0 ${outerGlow}px ${this._currentColor}`;
 
     this.style.setProperty('--glow-shadow', glowShadow);
   }
 
-  private calculateColorAndIntensity(level: number): { color: { r: number; g: number; b: number }, intensity: number } {
+  private calculateColorAndIntensity(level: number): {
+    color: { r: number; g: number; b: number };
+    intensity: number;
+  } {
     // Find the two color stops to interpolate between
     let lowerStop = this.colorStops[0];
     let upperStop = this.colorStops[this.colorStops.length - 1];
 
     for (let i = 0; i < this.colorStops.length - 1; i++) {
-      if (level >= this.colorStops[i].threshold && level <= this.colorStops[i + 1].threshold) {
+      if (
+        level >= this.colorStops[i].threshold &&
+        level <= this.colorStops[i + 1].threshold
+      ) {
         lowerStop = this.colorStops[i];
         upperStop = this.colorStops[i + 1];
         break;
@@ -146,9 +154,15 @@ export class DSPOverloadIndicator extends LitElement {
 
     // Interpolate between colors
     const color = {
-      r: Math.round(lowerStop.color.r + (upperStop.color.r - lowerStop.color.r) * factor),
-      g: Math.round(lowerStop.color.g + (upperStop.color.g - lowerStop.color.g) * factor),
-      b: Math.round(lowerStop.color.b + (upperStop.color.b - lowerStop.color.b) * factor),
+      r: Math.round(
+        lowerStop.color.r + (upperStop.color.r - lowerStop.color.r) * factor,
+      ),
+      g: Math.round(
+        lowerStop.color.g + (upperStop.color.g - lowerStop.color.g) * factor,
+      ),
+      b: Math.round(
+        lowerStop.color.b + (upperStop.color.b - lowerStop.color.b) * factor,
+      ),
     };
 
     // Calculate glow intensity (0 to 1)
@@ -201,7 +215,7 @@ export class DSPOverloadIndicator extends LitElement {
 
       // Accelerate blinking: start at 300ms, end at 25ms
       const progress = blinkCount / maxBlinks;
-      const blinkInterval = 300 - (progress * 275); // 300ms -> 25ms
+      const blinkInterval = 300 - progress * 275; // 300ms -> 25ms
 
       // Toggle visibility for blink effect
       const isVisible = blinkCount % 2 === 0;
@@ -231,11 +245,13 @@ export class DSPOverloadIndicator extends LitElement {
 
   private _triggerReset() {
     // Dispatch custom event to trigger the main app's resetAll method
-    this.dispatchEvent(new CustomEvent('dsp-overload-reset', {
-      bubbles: true,
-      composed: true,
-      detail: { message: 'DSP Overload triggered system reset!' }
-    }));
+    this.dispatchEvent(
+      new CustomEvent('dsp-overload-reset', {
+        bubbles: true,
+        composed: true,
+        detail: { message: 'DSP Overload triggered system reset!' },
+      }),
+    );
 
     // Clean up overload state
     this._stopOverloadSequence();

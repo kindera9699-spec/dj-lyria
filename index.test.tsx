@@ -7,7 +7,6 @@ import type { MidiDispatcher } from './utils/MidiDispatcher';
 const TRANSIENT_MESSAGE_DURATION = 2500;
 const VALID_API_KEY = 'AIzaSyTestKeyForPromptDjMidiLength39'; // 39 characters, starts with AIzaSy
 
-
 describe('PromptDjMidi - Frequency Logic', () => {
   let element: PromptDjMidi;
   let mockMidiDispatcher: MidiDispatcher;
