@@ -13,8 +13,8 @@
   - `Top K`
   - `Guidance`
   - `Bass / Drums Solo`
-- ⏺️ rec ( 🎙️ [ogg](https://en.wikipedia.org/wiki/Vorbis) encoder with wasm polyfill for safari ( alpha feat | see [#67](https://github.com/daoch4n/dj-lyria/issues/67) ) ):
-  - hold the power button to start recording | tap again to stop
+- ⏺️ rec ( 🎙️ [ogg](https://en.wikipedia.org/wiki/Vorbis) encoder with polyfill for safari ):
+  - hold the 	`⏯️` power button to start recording | `⏺️` to stop
 
 ### run:
 
