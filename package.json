@@ -8,10 +8,7 @@
     "build": "vite build",
     "preview": "vite preview",
     "test": "vitest",
-    "lint": "biome lint .",
-    "format": "biome format --write .",
-    "autolint": "biome check --write .",
-    "fix": "biome check --fix --unsafe"
+    "lint": "biome check --write .",
   },
   "dependencies": {
     "@google/genai": "^1.0.0",
