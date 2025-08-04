@@ -1707,7 +1707,7 @@ export class PromptDjMidi extends LitElement {
         retries++;
         const delay = INITIAL_BACKOFF_DELAY * 2 ** (retries - 1);
         console.warn(
-          `Attempt ${retries} to save API key failed. Retrying in ${delay}ms...`,
+          `Attempt ${retries} to Save failed. Retrying in ${delay}ms...`,
           error,
         );
         if (retries < MAX_RETRIES) {
@@ -1717,7 +1717,7 @@ export class PromptDjMidi extends LitElement {
     }
 
     if (!success) {
-      console.error(`Failed to save API key after ${MAX_RETRIES} attempts.`);
+      console.error(`Failed to Save after ${MAX_RETRIES} attempts.`);
       this.apiKeyInvalid = true;
       this.apiKeySavedSuccessfully = false;
       this.showApiKeyControls = true; // Ensure controls are visible if save fails
@@ -2971,7 +2971,7 @@ export class PromptDjMidi extends LitElement {
               <div class="api-controls">
                 <input
                   type="text"
-                  placeholder="Gemini API Key"
+                  placeholder="Enter API Key"
                   .value=${this.geminiApiKey || ''}
                   @input=${this.handleApiKeyInputChange}
                   @keydown=${(e: KeyboardEvent) => {
@@ -2980,15 +2980,15 @@ export class PromptDjMidi extends LitElement {
                     }
                   }}
                 />
-                <button @click=${this.handlePasteApiKeyClick}>Paste API key</button>
+                <button @click=${this.handlePasteApiKeyClick}>Paste</button>
                 ${
                   this.geminiApiKey
                     ? html`
-                  <button @click=${this.handleClearApiKeyClick}>Clear API Key</button>
+                  <button @click=${this.handleClearApiKeyClick}>Clear</button>
                 `
                     : ''
                 }
-                <button @click=${this.handleSaveApiKeyClick}>Save API Key</button>
+                <button @click=${this.handleSaveApiKeyClick}>Save</button>
               </div>
               ${
                 !this.geminiApiKey
@@ -3050,13 +3050,13 @@ export class PromptDjMidi extends LitElement {
               }}
               placeholder="Preset Name"
             />
-            <button id="savePresetButton" @click=${this.handleSavePresetClick}>Save Preset</button>
+            <button id="savePresetButton" @click=${this.handleSavePresetClick}>Save</button>
             <select
               id="presetSelector"
               .value=${this.selectedPreset}
               @change=${this.handlePresetSelectedChange}
             >
-              <option value="">Load Preset</option>
+              <option value="">Load</option>
               ${this.availablePresets.map((name) => html`<option value=${name}>${name}</option>`)}
             </select>
             <button
@@ -3064,7 +3064,7 @@ export class PromptDjMidi extends LitElement {
               @click=${this.handleDeletePresetClick}
               .disabled=${!this.selectedPreset || this.availablePresets.length === 0}
             >
-              Delete Preset
+              Delete
             </button>
           </div>
           `

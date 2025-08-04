@@ -77,7 +77,7 @@ export class PasteButton extends LitElement {
 
   override render() {
     return html`
-      <button @click=${this.handlePasteClick}>Paste API key</button>
+      <button @click=${this.handlePasteClick}>Paste</button>
       ${this.clipboardError ? html`<span style="color: yellow; margin-left: 5px;">${this.clipboardError}</span>` : ''}
     `;
   }
