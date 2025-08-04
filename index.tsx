@@ -634,20 +634,20 @@ export class PromptDjMidi extends LitElement {
       });
     }
     // Initial check on load, sets transient message if key found
-    this.checkApiKeyStatus(true);
+    this.checkApiKeyStatus();
   }
 
-  private _animateAudioLevel(): void {
+  private _animateAudioLevel(_timestamp?: DOMHighResTimeStamp): void {
     this.updateAudioLevel();
     this._audioLevelAnimationId = requestAnimationFrame(
-      this._animateAudioLevelBound,
+      this._animateAudioLevelBound
     );
   }
 
   private _startAudioLevelAnimation(): void {
     if (this._audioLevelAnimationId === null) {
       this._audioLevelAnimationId = requestAnimationFrame(
-        this._animateAudioLevelBound,
+        this._animateAudioLevelBound
       );
     }
   }
@@ -981,16 +981,16 @@ export class PromptDjMidi extends LitElement {
           // Calculate linear distance from default (0-1)
           const linearExtremeness = Math.abs(currentValue - defaultValue) / range;
           const clampedLinear = Math.min(1, Math.max(0, linearExtremeness));
-          
+
           // Apply exponential scaling: closer to default = much less contribution
           // Using power of 0.5 for very aggressive curve that shows strong impact at extremes
           const exponentialExtremeness = Math.pow(clampedLinear, 0.5);
-          
+
           // Temporary debug logging
           if (exponentialExtremeness > 0.1) {
             console.log(`${knobId}: ${currentValue.toFixed(2)} -> linear: ${clampedLinear.toFixed(3)}, exponential: ${exponentialExtremeness.toFixed(3)}`);
           }
-          
+
           extremenessValues.push(exponentialExtremeness);
         }
       }
@@ -1001,7 +1001,7 @@ export class PromptDjMidi extends LitElement {
     if (extremenessValues.length > 0) {
       const sum = extremenessValues.reduce((acc, val) => acc + val, 0);
       this.knobAverageExtremeness = sum / extremenessValues.length;
-      
+
 
     } else {
       this.knobAverageExtremeness = 0;
@@ -1011,8 +1011,6 @@ export class PromptDjMidi extends LitElement {
 
   private async checkAndTriggerOverloadReset(): Promise<void> {
     await this.updateComplete;
-    const promptAverageCritical = 1.95;
-    const knobExtremenessCritical = 0.95;
     // Normalize promptAverage to 0-1 for combined factor, then add knobExtremeness (already 0-1)
     // Max possible combinedFactor is 2.0 (promptAvg 2.0 -> 1.0; knobExtremeness 1.0 -> 1.0)
     // Calculate audio level contribution: 0 at 10, 0.5 at 20, clamped between 0 and 0.5
@@ -1025,8 +1023,8 @@ export class PromptDjMidi extends LitElement {
     const freqNormalized = Math.max(
       0,
       (this.flowFrequency - PromptDjMidi.FREQ_CONTRIBUTION_THRESHOLD_HZ) /
-        (PromptDjMidi.FREQ_CONTRIBUTION_MAX_HZ -
-          PromptDjMidi.FREQ_CONTRIBUTION_THRESHOLD_HZ),
+      (PromptDjMidi.FREQ_CONTRIBUTION_MAX_HZ -
+        PromptDjMidi.FREQ_CONTRIBUTION_THRESHOLD_HZ),
     );
     const frequencyContribution = Math.min(
       0.5,
@@ -1037,8 +1035,8 @@ export class PromptDjMidi extends LitElement {
     const ampNormalized = Math.max(
       0,
       (this.flowAmplitude - PromptDjMidi.AMP_CONTRIBUTION_THRESHOLD_VALUE) /
-        (PromptDjMidi.AMP_CONTRIBUTION_MAX_VALUE -
-          PromptDjMidi.AMP_CONTRIBUTION_THRESHOLD_VALUE),
+      (PromptDjMidi.AMP_CONTRIBUTION_MAX_VALUE -
+        PromptDjMidi.AMP_CONTRIBUTION_THRESHOLD_VALUE),
     );
     const amplitudeContribution = Math.min(
       0.5,
@@ -1074,7 +1072,7 @@ export class PromptDjMidi extends LitElement {
       const purpleProgress = Math.min(
         1,
         (combinedFactor - combinedFactorThreshold) /
-          (purpleMaxFactor - combinedFactorThreshold),
+        (purpleMaxFactor - combinedFactorThreshold),
       );
 
       // Interpolate hue from red (0) towards purple (270)
@@ -2284,7 +2282,7 @@ export class PromptDjMidi extends LitElement {
       const text = await navigator.clipboard.readText();
       if (text && text.trim().length > 0) {
         this.geminiApiKey = text.trim();
-        await this.requestUpdate(); // Ensure the input field updates
+        this.requestUpdate(); // Ensure the input field updates
         console.log('API Key pasted from clipboard.');
         await this.saveApiKeyToLocalStorage(); // Direct save
       } else {
@@ -2464,10 +2462,10 @@ export class PromptDjMidi extends LitElement {
 
   private handleDspOverloadReset(event: CustomEvent) {
     console.log('🚨 DSP OVERLOAD DETECTED! Triggering system reset...', event.detail);
-    
+
     // Immediately stop any audio and reset power button to idle state
     this.stop();
-    
+
     // Add a small delay for dramatic effect
     setTimeout(() => {
       this.resetAll();
@@ -2477,7 +2475,7 @@ export class PromptDjMidi extends LitElement {
 
   private resetAll() {
     this.config = { ...PromptDjMidi.INITIAL_CONFIG };
-    
+
     // Reset power button to idle state by stopping audio properly
     this.stop();
 
@@ -2849,38 +2847,34 @@ export class PromptDjMidi extends LitElement {
             @click=${this.togglePresetControlsVisibility}
             class=${this.showPresetControls ? 'active' : ''}
             >Presets</button>
-          ${
-            this.showMidi
-              ? html`
+          ${this.showMidi
+        ? html`
             <select
               @change=${this.handleMidiInputChange}
               .value=${this.activeMidiInputId || ''}>
-              ${
-                this.midiInputIds.length > 0
-                  ? this.midiInputIds.map(
-                      (id) =>
-                        html`<option value=${id}>
+              ${this.midiInputIds.length > 0
+            ? this.midiInputIds.map(
+              (id) =>
+                html`<option value=${id}>
                         ${this.midiDispatcher.getDeviceName(id)}
                       </option>`,
-                    )
-                  : html`<option value="">No devices found</option>`
-              }
+            )
+            : html`<option value="">No devices found</option>`
+          }
             </select>
           `
-              : ''
-          }
+        : ''
+      }
 
           <!-- Flow Button -->
           <button @click=${this.toggleSeedFlow} class=${this.isSeedFlowing ? 'active' : ''}>Flow</button>
 
           <!-- Conditional Flow Parameters Group -->
-          ${
-            this.isSeedFlowing || this.isAnyFlowActive
-              ? html`
+          ${this.isSeedFlowing || this.isAnyFlowActive
+        ? html`
             <div class="flow-parameters-group">
-              ${
-                this.isSeedFlowing
-                  ? html`
+              ${this.isSeedFlowing
+            ? html`
                 <button
                   id="flowUpButton"
                   class="flow-direction-button ${this.flowDirectionUp ? 'active' : ''}"
@@ -2894,11 +2888,10 @@ export class PromptDjMidi extends LitElement {
                   ${this.isSeedFlowing ? (this.config.seed ?? 'Generating...') : this.config.seed === null ? 'Auto' : this.config.seed}
                 </span>
               `
-                  : ''
-              }
-              ${
-                this.isAnyFlowActive
-                  ? html`
+            : ''
+          }
+              ${this.isAnyFlowActive
+            ? html`
                 <label>Freq: ${this.formatFlowFrequency(this.flowFrequency)}</label>
                 <button
                   @pointerdown=${() => this.handleFreqButtonPress(false)}
@@ -2922,17 +2915,16 @@ export class PromptDjMidi extends LitElement {
                   @pointerleave=${this.handleAmpButtonRelease}
                   class="flow-control-button">+</button>
               `
-                  : ''
-              }
+            : ''
+          }
             </div>
           `
-              : ''
-          }
+        : ''
+      }
 
           <!-- API Key Controls -->
-          ${
-            this.showApiKeyControls
-              ? html`
+          ${this.showApiKeyControls
+        ? html`
               <div class="api-controls">
                 <input
                   type="text"
@@ -2940,68 +2932,63 @@ export class PromptDjMidi extends LitElement {
                   .value=${this.geminiApiKey || ''}
                   @input=${this.handleApiKeyInputChange}
                   @keydown=${(e: KeyboardEvent) => {
-                    if (e.key === 'Enter') {
-                      this.handleSaveApiKeyClick();
-                    }
-                  }}
+            if (e.key === 'Enter') {
+              this.handleSaveApiKeyClick();
+            }
+          }}
                 />
                 <button @click=${this.handlePasteApiKeyClick}>Paste API key</button>
-                ${
-                  this.geminiApiKey
-                    ? html`
+                ${this.geminiApiKey
+            ? html`
                   <button @click=${this.handleClearApiKeyClick}>Clear API Key</button>
                 `
-                    : ''
-                }
+            : ''
+          }
                 <button @click=${this.handleSaveApiKeyClick}>Save API Key</button>
               </div>
-              ${
-                !this.geminiApiKey
-                  ? html`
+              ${!this.geminiApiKey
+            ? html`
                 <button @click=${this.getApiKey}>Get API Key</button>
               `
-                  : ''
-              }
+            : ''
+          }
             </div>
           `
-              : !this.apiKeyInvalid && this.apiKeySavedSuccessfully
-                ? html`
+        : !this.apiKeyInvalid && this.apiKeySavedSuccessfully
+          ? html`
             <button @click=${this.handleManageApiKeyClick}>API</button>
           `
-                : ''
-          }
+          : ''
+      }
           <div class="api-status-messages">
-            ${
-              this.transientApiKeyStatusMessage
-                ? html`
+            ${this.transientApiKeyStatusMessage
+        ? html`
               <span style="color: lightblue; margin-left: 10px;">${this.transientApiKeyStatusMessage}</span>
             `
-                : this.apiKeyInvalid
-                  ? html`
+        : this.apiKeyInvalid
+          ? html`
               <span style="color: red; margin-left: 10px;">
-                ${
-                  typeof localStorage === 'undefined'
-                    ? 'localStorage not available. API Key cannot be saved.'
-                    : 'API Key is invalid or authentication failed.'
-                }
+                ${typeof localStorage === 'undefined'
+              ? 'localStorage not available. API Key cannot be saved.'
+              : 'API Key is invalid or authentication failed.'
+            }
               </span>
             `
-                    : !this.geminiApiKey && !this.apiKeySavedSuccessfully
-                      ? html`
+          : !this.geminiApiKey && !this.apiKeySavedSuccessfully
+            ? html`
               <span style="color: yellow; margin-left: 10px;">No API Key provided.</span>
             `
-                      : this.geminiApiKey && !this.apiKeySavedSuccessfully
-                        ? html`
+            : this.geminiApiKey && !this.apiKeySavedSuccessfully
+              ? html`
               <span style="color: orange; margin-left: 10px;">API Key entered. Save or start playback to use.</span>
             `
-                        : ''
-            }
+              : ''
+      }
           </div>
 
           <!-- Preset Controls -->
-          ${
-            this.showPresetControls
-              ? html`
+          ${this.showPresetControls
+        ? html`
           <div class="preset-controls">
             <input
               type="text"
@@ -3009,10 +2996,10 @@ export class PromptDjMidi extends LitElement {
               .value=${this.presetNameToSave}
               @input=${this.handlePresetNameInputChange}
               @keydown=${(e: KeyboardEvent) => {
-                if (e.key === 'Enter') {
-                  this.handleSavePresetClick();
-                }
-              }}
+            if (e.key === 'Enter') {
+              this.handleSavePresetClick();
+            }
+          }}
               placeholder="Preset Name"
             />
             <button id="savePresetButton" @click=${this.handleSavePresetClick}>Save Preset</button>
@@ -3033,8 +3020,8 @@ export class PromptDjMidi extends LitElement {
             </button>
           </div>
           `
-              : ''
-          }
+        : ''
+      }
         </div>
         <div id="main-content-area">
 ${this.renderPrompts()}
@@ -3200,7 +3187,7 @@ ${this.renderPrompts()}
   private renderPrompts() {
     return html`<div id="grid">
      ${[...this.prompts.values()].map((prompt) => {
-       return html`<prompt-controller
+      return html`<prompt-controller
          promptId=${prompt.promptId}
          filtered=${this.filteredPrompts.has(prompt.text)}
          cc=${prompt.cc}
@@ -3214,7 +3201,7 @@ ${this.renderPrompts()}
          @prompt-changed=${this.handlePromptChanged}
          @prompt-autoflow-toggled=${this.handlePromptAutoFlowToggled}>
        </prompt-controller>`;
-     })}
+    })}
    </div>`;
   }
 

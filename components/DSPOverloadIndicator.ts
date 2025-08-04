@@ -14,9 +14,7 @@ export class DSPOverloadIndicator extends LitElement {
   @state() private _visible = false;
   @state() private _overloadLevel = 0;
   @state() private _currentColor = 'rgb(0, 255, 0)';
-  @state() private _glowIntensity = 0;
   @state() private _isOverloadState = false;
-  @state() private _blinkSpeed = 1;
 
   private _blinkAnimationId: number | null = null;
   private _overloadResetTimer: number | null = null;
@@ -117,7 +115,6 @@ export class DSPOverloadIndicator extends LitElement {
     const { color, intensity } = this.calculateColorAndIntensity(this._overloadLevel);
 
     this._currentColor = `rgb(${color.r}, ${color.g}, ${color.b})`;
-    this._glowIntensity = intensity;
 
     // Update CSS variables for dynamic styling
     this.style.setProperty('--border-color', this._currentColor);
@@ -174,7 +171,6 @@ export class DSPOverloadIndicator extends LitElement {
 
   private _startOverloadSequence() {
     // Start with slow blinking, then accelerate
-    this._blinkSpeed = 1;
     this._startBlinking();
 
     // Set timer to trigger reset after 10 seconds of OVERLOAD state
