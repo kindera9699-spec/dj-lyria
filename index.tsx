@@ -2473,6 +2473,16 @@ export class PromptDjMidi extends LitElement {
     // and because it's a @state property, Lit should handle re-rendering the record-button.
   }
 
+  private handleDspOverloadStarted(event: CustomEvent) {
+    console.log(
+      '⚡ DSP OVERLOAD SEQUENCE STARTED! Scrolling sidebar to top...',
+      event.detail,
+    );
+
+    // Trigger sidebar autoscroll to top during the flashing sequence
+    this.scrollSidebarToTop();
+  }
+
   private handleDspOverloadReset(event: CustomEvent) {
     console.log(
       '🚨 DSP OVERLOAD DETECTED! Triggering system reset...',
@@ -2487,6 +2497,17 @@ export class PromptDjMidi extends LitElement {
       this.resetAll();
       console.log('✅ System reset completed due to DSP overload');
     }, 100);
+  }
+
+  private scrollSidebarToTop() {
+    // Find the sidebar panel and scroll it to the top
+    const sidebarPanel = this.shadowRoot?.querySelector('.advanced-settings-panel');
+    if (sidebarPanel) {
+      sidebarPanel.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+      });
+    }
   }
 
   private resetAll() {
@@ -3059,6 +3080,7 @@ ${this.renderPrompts()}
             .currentKnobAverageExtremeness=${this.knobAverageExtremeness}
             .indicatorColor=${this.dspOverloadIndicatorColor}
             .blinkDuration=${this.dspOverloadBlinkDuration}
+            @dsp-overload-started=${this.handleDspOverloadStarted}
             @dsp-overload-reset=${this.handleDspOverloadReset}
           ></dsp-overload-indicator>
           <unified-dj-control-block

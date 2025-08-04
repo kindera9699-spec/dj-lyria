@@ -184,6 +184,15 @@ export class DSPOverloadIndicator extends LitElement {
   }
 
   private _startOverloadSequence() {
+    // Dispatch event to trigger sidebar scroll to top
+    this.dispatchEvent(
+      new CustomEvent('dsp-overload-started', {
+        bubbles: true,
+        composed: true,
+        detail: { message: 'DSP Overload sequence started - scrolling sidebar to top' },
+      }),
+    );
+
     // Start with slow blinking, then accelerate
     this._startBlinking();
 
