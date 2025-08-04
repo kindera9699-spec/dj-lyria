@@ -11,6 +11,29 @@ export interface DJStyleSelectorOption {
 @customElement('dj-style-selector')
 export class DJStyleSelector extends LitElement {
   static override styles = css`
+    @keyframes rgb-glow {
+      0% {
+        box-shadow: 0 0 4px #ff0000, 0 0 8px #ff0000;
+      }
+      17% {
+        box-shadow: 0 0 4px #ff00ff, 0 0 8px #ff00ff;
+      }
+      33% {
+        box-shadow: 0 0 4px #0000ff, 0 0 8px #0000ff;
+      }
+      50% {
+        box-shadow: 0 0 4px #00ffff, 0 0 8px #00ffff;
+      }
+      67% {
+        box-shadow: 0 0 4px #00ff00, 0 0 8px #00ff00;
+      }
+      83% {
+        box-shadow: 0 0 4px #ffff00, 0 0 8px #ffff00;
+      }
+      100% {
+        box-shadow: 0 0 4px #ff0000, 0 0 8px #ff0000;
+      }
+    }
     :host {
       display: flex;
       flex-direction: column;
@@ -43,6 +66,11 @@ export class DJStyleSelector extends LitElement {
       /* Styles specific to selected options that are NOT .auto-scale-selected */
       background-color: var(--glow-color, #007bff);
       box-shadow: 0 0 7px var(--glow-color, #007bff);
+    }
+    .option.auto-scale-selected {
+      /* Styles specific to the selected "Auto" scale option */
+      border: 1px solid transparent;
+      animation: rgb-glow 40s linear infinite;
     }
   `;
 
