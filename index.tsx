@@ -255,6 +255,12 @@ export class PromptDjMidi extends LitElement {
       background-color: rgba(0, 0, 0, 0.5); /* Slightly darker on hover */
       box-shadow: 0 0 5px -1px #007bff;
     }
+    .advanced-settings-panel .setting .option-button#reset-button:hover {
+      box-shadow: 0 0 8px #ff0000, 0 0 16px #ff0000, 0 0 24px #ff0000 !important; 
+      border-color: #ff0000 !important; 
+      background-color: rgba(255, 0, 0, 0.1) !important;
+      transition: all 0.2s ease;
+    }
     .advanced-settings-panel .setting .option-button.selected {
       background-color: rgba(0, 0, 0, 0.4); /* Consistent black alpha */
       border-color: #0056b3;
@@ -444,17 +450,23 @@ export class PromptDjMidi extends LitElement {
 
    .solo-group-header {
      font-weight: bold;
-     margin-top: 15px; 
-     margin-bottom: 5px; 
-     text-align: center; 
+     margin: 15px 0 5px 0; 
      color: #fff; 
+     display: flex;
+     justify-content: center;
+     align-items: center;
+     width: 100%;
+     text-align: center;
+     font-family: 'DS-Digital', cursive;
    }
    .solo-button-group .setting {
      margin-bottom: 8px; 
    }
-   #reset-button:hover {
-     box-shadow: 0 0 8px #ff0000, 0 0 12px #ff0000; 
-     border-color: #ff4444; 
+   .advanced-settings-panel .setting #reset-button:hover {
+     box-shadow: 0 0 8px #ff0000, 0 0 16px #ff0000, 0 0 24px #ff0000 !important; 
+     border-color: #ff0000 !important; 
+     background-color: rgba(255, 0, 0, 0.1) !important;
+     transition: all 0.2s ease;
    }
    `;
 
@@ -3143,7 +3155,6 @@ ${this.renderPrompts()}
               Auto
             </div>
           </div>
-          <h4 class="solo-group-header">Solo</h4>
           <div class="solo-button-group">
             <div class="setting">
               <div
