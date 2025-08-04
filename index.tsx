@@ -217,8 +217,8 @@ export class PromptDjMidi extends LitElement {
       align-items: stretch;
       margin-bottom: 15px;
       }
-    .advanced-settings-panel .setting > label:first-child {
-        margin-bottom: 8px;
+    .advanced-settings-panel .setting > label {
+        margin: 8px 0;
         font-weight: bold;
         text-align: center;
         color: #fff; 
@@ -3054,12 +3054,12 @@ ${this.renderPrompts()}
             @record-click=${this.handleRecordClick}
           ></unified-dj-control-block>
           <div class="setting">
-            <label for="density">Density: <span class="label-value">${(this.config.density ?? 0.5).toFixed(2)}</span></label>
             <weight-knob
               id="density"
               .value=${this.autoDensity ? 1 : cfg.density * 2}
               @input=${this.handleInputChange}
             ></weight-knob>
+            <label for="density">Density: <span class="label-value">${(this.config.density ?? 0.5).toFixed(2)}</span></label>
             <div
               id="auto-density"
               class="option-button ${this.autoDensity ? 'selected' : ''}"
@@ -3069,12 +3069,12 @@ ${this.renderPrompts()}
             </div>
           </div>
           <div class="setting">
-            <label for="brightness">Brightness: <span class="label-value">${(this.config.brightness ?? 0.5).toFixed(2)}</span></label>
             <weight-knob
               id="brightness"
               .value=${this.autoBrightness ? 1 : cfg.brightness * 2}
               @input=${this.handleInputChange}
             ></weight-knob>
+            <label for="brightness">Brightness: <span class="label-value">${(this.config.brightness ?? 0.5).toFixed(2)}</span></label>
             <div
               id="auto-brightness"
               class="option-button ${this.autoBrightness ? 'selected' : ''}"
@@ -3084,12 +3084,12 @@ ${this.renderPrompts()}
             </div>
           </div>
           <div class="setting">
-            <label for="bpm">BPM: <span class="label-value">${this.autoBpm ? 'AUTO' : (this.config.bpm ?? 120).toFixed(0)}</span></label>
             <weight-knob
               id="bpm"
               .value=${this.autoBpm ? 1 : (((cfg.bpm ?? 120) - 60) / (180 - 60)) * 2}
               @input=${this.handleInputChange}
             ></weight-knob>
+            <label for="bpm">BPM: <span class="label-value">${this.autoBpm ? 'AUTO' : (this.config.bpm ?? 120).toFixed(0)}</span></label>
             <div
               id="auto-bpm"
               class="option-button ${this.autoBpm ? 'selected' : ''}"
@@ -3108,13 +3108,13 @@ ${this.renderPrompts()}
             ></dj-style-selector>
           </div>
           <div class="setting">
-            <label for="temperature">Temperature: <span class="label-value">${(this.config.temperature ?? 1.1).toFixed(1)}</span></label>
             <weight-knob
               id="temperature"
               .value=${this.autoTemperature ? ((1.1 - 0) / (3 - 0)) * 2 : (((cfg.temperature ?? 1.1) - 0) / (3 - 0)) * 2}
               .displayValue=${(this.config.temperature ?? 1.1).toFixed(1)}
               @input=${this.handleInputChange}
             ></weight-knob>
+            <label for="temperature">Temperature: <span class="label-value">${(this.config.temperature ?? 1.1).toFixed(1)}</span></label>
             <div
               id="auto-temperature"
               class="option-button ${this.autoTemperature ? 'selected' : ''}"
@@ -3124,13 +3124,13 @@ ${this.renderPrompts()}
             </div>
           </div>
           <div class="setting">
-            <label for="topK">Top K: <span class="label-value">${(this.config.topK ?? 40).toFixed(0)}</span></label>
             <weight-knob
               id="topK"
               .value=${this.autoTopK ? ((40 - 1) / (100 - 1)) * 2 : (((cfg.topK ?? 40) - 1) / (100 - 1)) * 2}
               .displayValue=${(this.config.topK ?? 40).toFixed(0)}
               @input=${this.handleInputChange}
             ></weight-knob>
+            <label for="topK">Top K: <span class="label-value">${(this.config.topK ?? 40).toFixed(0)}</span></label>
             <div
               id="auto-topK"
               class="option-button ${this.autoTopK ? 'selected' : ''}"
@@ -3140,13 +3140,13 @@ ${this.renderPrompts()}
             </div>
           </div>
           <div class="setting">
-            <label for="guidance">Guidance: <span class="label-value">${(this.config.guidance ?? 4.0).toFixed(1)}</span></label>
             <weight-knob
               id="guidance"
               .value=${this.autoGuidance ? ((4.0 - 0) / (6 - 0)) * 2 : (((cfg.guidance ?? 4.0) - 0) / (6 - 0)) * 2}
               .displayValue=${(this.config.guidance ?? 4.0).toFixed(1)}
               @input=${this.handleInputChange}
             ></weight-knob>
+            <label for="guidance">Guidance: <span class="label-value">${(this.config.guidance ?? 4.0).toFixed(1)}</span></label>
             <div
               id="auto-guidance"
               class="option-button ${this.autoGuidance ? 'selected' : ''}"
