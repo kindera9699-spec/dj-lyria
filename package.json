@@ -1,7 +1,6 @@
 {
-  "name": "promptdj-midi",
-  "private": true,
-  "version": "0.0.0",
+  "name": "dj-lyria",
+  "version": "u.w.u",
   "type": "module",
   "scripts": {
     "dev": "vite",
